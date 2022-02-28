@@ -100,12 +100,29 @@ div{
    background-color: #2a3a6e;
 }
 
+.other-button{
+  width:16%;
+  padding:10px;
+  margin-top: 5px;
+}
+
 .card-button {
   padding:5px;
   top:0;
   width:180px;
 
 }
+
+.side-button{
+  padding:5px; 
+  width:45%;
+}
+
+
+#down_home, #down_students, #down_staff, #down_finances, #down_academic, 
+  #down_work, #down_overview_csv, #down_overview{
+   background-color: #2a3a6e;
+ }
 
 .save-button .tooltiptext {
   visibility: hidden;

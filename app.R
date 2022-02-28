@@ -381,6 +381,12 @@ ui <- shinyMobile::f7Page(
                tabName = "Home",
                 icon = shinyMobile::f7Icon("house"),
                 active = T,
+               tags$div(
+                 shinyMobile::f7Button(
+                   inputId = 'down_home',
+                   label = tags$span(tags$i(class = 'fas fa-camera'), tags$span('Donwload as Image')) #fas fa classes corresponf to fontawesome
+                 ),
+           class = "other-button card-button2"),
                tags$div(style = 'display:flex;',
                  tags$div(class = 'side-panel',
                           style = 'padding:10px;',
@@ -405,7 +411,7 @@ ui <- shinyMobile::f7Page(
                      )
                    )
                  ),
-                 tags$div(style = 'width:75%;',
+                 tags$div(style = 'width:75%;', id = 'home-plots',
                           shinyMobile::f7Shadow(
                             hover = T,
                             intensity = 16,
@@ -456,9 +462,25 @@ ui <- shinyMobile::f7Page(
                      hover = T,
                      intensity = 16,
                      shinyMobile::f7Card(
+                       tags$div(
+                         style = 'display:flex;',
+                         tags$div(
+                           shinyMobile::f7Button(
+                             inputId = 'down_overview',
+                             label = tags$span(tags$i(class = 'fas fa-camera'), tags$span('Image')) #fas fa classes corresponf to fontawesome
+                           ),
+                           class = "side-button"
+                         ),
+                         tags$div(
+                      shinyMobile::f7DownloadButton( #various download functionalities
+                         outputId = 'down_overview_csv',
+                         label = 'CSV'
+                      ), class = "side-button"
+                      )
+                       ),
                        shinyMobile::f7Radio(
                          'individuals',
-                         label = h1("Show individual comparison districts?"), 
+                         label = tags$span(style = 'font-size:250%', "Show individual comparison districts?"), 
                          choices = c("No","Yes"),
                          selected = 'No'
                        )
@@ -466,7 +488,7 @@ ui <- shinyMobile::f7Page(
                      )
                    )
                  ),
-                 tags$div(style = 'width:80%;',
+                 tags$div(style = 'width:80%;', id = 'overview_table',
                           shinyMobile::f7Shadow(
                             hover = T,
                             intensity = 16,
@@ -481,7 +503,14 @@ ui <- shinyMobile::f7Page(
                tabName = "Students",
                 icon = shinyMobile::f7Icon("person_3"),
                 active = TRUE,
-               shinyMobile::f7Shadow(
+                tags$div(
+                   shinyMobile::f7Button(
+                     inputId = 'down_students',
+                     label = tags$span(tags$i(class = 'fas fa-camera'), tags$span('Donwload as Image')) #fas fa classes corresponf to fontawesome
+                   ),
+                   class = "other-button card-button2"
+                 ),
+               tags$div(id = 'students',shinyMobile::f7Shadow(
                  hover = T,
                  intensity = 16,
                  shinyMobile::f7Card(
@@ -514,13 +543,20 @@ ui <- shinyMobile::f7Page(
                                                  htmlOutput('mobility_info'))
                    
                  )
-               )
+               ))
           ),
           shinyMobile::f7Tab(
                tabName = "Staff",
                 icon = shinyMobile::f7Icon("person_2"),
                 active = F,
-               shinyMobile::f7Shadow(
+               tags$div(
+                   shinyMobile::f7Button(
+                     inputId = 'down_staff',
+                     label = tags$span(tags$i(class = 'fas fa-camera'), tags$span('Donwload as Image')) #fas fa classes corresponf to fontawesome
+                   ),
+                   class = "other-button card-button2"
+                 ),
+               tags$div(id = 'staff',shinyMobile::f7Shadow(
                  hover = T,
                  intensity = 16,
                  shinyMobile::f7Card(
@@ -559,35 +595,56 @@ ui <- shinyMobile::f7Page(
                      shinyMobile::f7Card(
                        plotly::plotlyOutput('teacher_percents')
                      )
-               )
+               ))
           ),
           shinyMobile::f7Tab(
                tabName = "Finances",
                 icon = shinyMobile::f7Icon("money_dollar"),
                 active = TRUE,
-               shinyMobile::f7Shadow(
+               tags$div(
+                   shinyMobile::f7Button(
+                     inputId = 'down_finances',
+                     label = tags$span(tags$i(class = 'fas fa-camera'), tags$span('Donwload as Image')) #fas fa classes corresponf to fontawesome
+                   ),
+                   class = "other-button card-button2"
+                 ),
+               tags$div(id = 'finances', shinyMobile::f7Shadow(
                  hover = T,
                  intensity = 16,
                  shinyMobile::f7Card(
                    tags$div(style = "display:flex;",
                         tags$div(class = 'inputs',
-                          plotly::plotlyOutput('finances')),
+                          plotly::plotlyOutput('finances_plot')),
                         tags$div(class = 'inputs',
                           plotly::plotlyOutput('cola_plot_comp'))
                         )
                  )
-               ),
+               ))
           ),
           shinyMobile::f7Tab(
                tabName = "Academic",
                 icon = shinyMobile::f7Icon("book"),
-                active = TRUE
+                active = TRUE,
+               tags$div(
+                   shinyMobile::f7Button(
+                     inputId = 'down_academic',
+                     label = tags$span(tags$i(class = 'fas fa-camera'), tags$span('Donwload as Image')) #fas fa classes corresponf to fontawesome
+                   ),
+                   class = "other-button card-button2"
+                 )
           ),
           shinyMobile::f7Tab(
                tabName = "Work Cond.",
                 icon = shinyMobile::f7Icon("briefcase"),
                 active = TRUE,
-               shinyMobile::f7Shadow(
+               tags$div(
+                   shinyMobile::f7Button(
+                     inputId = 'down_work',
+                     label = tags$span(tags$i(class = 'fas fa-camera'), tags$span('Donwload as Image')) #fas fa classes corresponf to fontawesome
+                   ),
+                   class = "other-button card-button2"
+                 ),
+               tags$div(id = 'work',shinyMobile::f7Shadow(
                      hover = T,
                      intensity = 16,
                      shinyMobile::f7Card(
@@ -606,15 +663,11 @@ ui <- shinyMobile::f7Page(
                  hover = T,
                  intensity = 16,
                  shinyMobile::f7Card(
-                   tags$div(style = "display:flex;",
-                        tags$div(class = 'inputs',
-                          plotly::plotlyOutput('sick_bank')),
-                        tags$div(class = 'inputs',
-                          plotly::plotlyOutput(''))
-                        )
+                          plotly::plotlyOutput('sick_bank'),
+                        
                  )
                )
-          )
+          ))
       )
     )
 )
@@ -1451,7 +1504,36 @@ summary_gt <- reactive({
   })
   
   
+  observeEvent(input$down_home, { #take "screenshot" of home selector
+    shinyscreenshot::screenshot(selector = '#home-plots' , filename = paste(comp_year(), district(), 'Home.png'), scale = 4)
+  })
+  observeEvent(input$down_overview, { #take "screenshot" of  selector
+    shinyscreenshot::screenshot(selector = '#overview_table' , filename =  paste(comp_year(), district(),'Student Page.png'), scale = 4)
+  })
+  observeEvent(input$down_students, { #take "screenshot" of  selector
+    shinyscreenshot::screenshot(selector = '#students' , filename =  paste(comp_year(), district(),'Student Page.png'), scale = 4)
+  })
+  observeEvent(input$down_staff, { #take "screenshot" of  selector
+    shinyscreenshot::screenshot(selector = '#staff' , filename =  paste(comp_year(), district(),'Staff Page.png'), scale = 4)
+  })
+  observeEvent(input$down_finance, { #take "screenshot" of  selector
+    shinyscreenshot::screenshot(selector = '#finances' , filename =  paste(comp_year(), district(),'Finance Page.png'), scale = 4)
+  })
+  observeEvent(input$down_academic, { #take "screenshot" of  selector
+    shinyscreenshot::screenshot(selector = '#academic' , filename =  paste(comp_year(), district(),'Academic Page.png'), scale = 4)
+  })
+  observeEvent(input$down_work, { #take "screenshot" of selector
+    shinyscreenshot::screenshot(selector = '#work' , filename =  paste(comp_year(), district(),'Working Conditions Page.png'), scale = 4)
+  })
   
+  output$down_overview_csv = downloadHandler(
+     filename = function() {
+       paste(comp_year(), district(), "Overview.csv")
+     },
+     content = function(file) {
+       write.csv(comp_table(), file, row.names = F)
+     }
+   )
 
     
 
@@ -2552,7 +2634,7 @@ summary_gt <- reactive({
     })
 
 
-    output$finances <- plotly::renderPlotly(
+    output$finances_plot <- plotly::renderPlotly(
         plotly::plot_ly(
             finance_data(),
             labels = ~ c('Instructional Services', 'Administration', 'Pupil Services', 'Operations and Maintenance', 'Insurance, Retirement and others'),
@@ -2740,7 +2822,7 @@ summary_gt <- reactive({
   output$health_percents <-  plotly::renderPlotly(
         plotly::plot_ly(
         health_df(),
-        x = ~ c('% Health Insurance Paid', '% Nurses Unionized', 'Sick Days Buy Back %', 'Sick Leave Bank'),
+        x = ~ c('% Health Insurance Paid', 'Nurses Unionized?', 'Sick Days Buy Back?', 'Sick Leave Bank'),
         y = ~ district,
         type = 'bar',
         name = district(),
@@ -2771,7 +2853,7 @@ summary_gt <- reactive({
   
   sick_bank_df <- reactive({
       plot_comp_df() %>% dplyr::select(
-        sick_days,sick_days_buy_back_rate,sick_leave_bank_cap
+        sick_days,sick_leave_bank_cap, personal_days_annually, personal_days_carry_over_max, bereavement_days, religious_days
       ) %>%
         t() %>%
         data.frame() %>% 
@@ -2783,14 +2865,14 @@ summary_gt <- reactive({
   output$sick_bank <-  plotly::renderPlotly(
         plotly::plot_ly(
         sick_bank_df(),
-        x = ~ c('Sick Days', 'Buy Back', 'Leave Bank'),
+        x = ~ c('Sick Days', 'Sick Bank Cap', 'Personal Days', 'Personal Days Carryover Cap', 'Bereavement Days', 'Religious Days'),
         y = ~ district,
         type = 'bar',
         name = district(),
         marker = list(color = '#DB9743'),
         hovertemplate = paste0(district()  , ': %{y:.1f}<extra></extra>'),
         texttemplate = '%{y:.0f}',
-        textposition = 'auto'
+        textposition = 'outside'
       ) %>%
         plotly:: config(displayModeBar = FALSE) %>%
         plotly::layout(
@@ -2801,7 +2883,7 @@ summary_gt <- reactive({
           font = list(size = 18),
           images = list(
             source = "https://raw.githubusercontent.com/SCasanova/arxed_ddd/main/www/D3%20Logo.png",
-            x = 0.02, y = 1.1,
+            x = 0.99, y = 1.1,
             sizex = 0.2, sizey = 0.2
         )
         ) %>% 
