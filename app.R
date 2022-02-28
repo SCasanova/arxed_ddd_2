@@ -294,7 +294,7 @@ ui <- shinyMobile::f7Page(
                            tags$div(
                                shinyMobile::f7SmartSelect(
                                    inputId = 'district',
-                                   label = tags$span(class = 'input-label', h4('1. Select Your Collaborative:')),
+                                   label = tags$span(class = 'input-label', h4('1. Select Your District:')),
                                    choices = district_options,
                                    selected = c('Concord-Carlisle'),
                                    virtualList = T,
