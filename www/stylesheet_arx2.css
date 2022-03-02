@@ -120,7 +120,7 @@ div{
 
 
 #down_home, #down_students, #down_staff, #down_finances, #down_academic, 
-  #down_work, #down_overview_csv, #down_overview{
+  #down_work, #down_overview_csv, #down_overview, #down_plot {
    background-color: #2a3a6e;
  }
 
@@ -207,4 +207,13 @@ div{
 
 .grid-block{
   width:33%;
+}
+
+.item-content .item-after{
+ color: #DB9743;
+}
+
+.shiny-html-output {
+  margin:0;
+  padding:0;
 }

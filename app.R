@@ -1,7 +1,6 @@
 
 # Dependencies ------------------------------------------------------------
 
-
 library(magrittr)
 library(shiny)
 options(encoding = "UTF-8")
@@ -22,32 +21,6 @@ sqlQuery <- function (query) {
   result
 }
 
- check_creds <- function(dbname, host, port, db_user, db_password) {
-      function(user, password) {
-        
-        con <- DBI::dbConnect(RMySQL::MySQL(), 
-                              dbname = dbname, 
-                              user = db_user, 
-                              password = db_password,
-                              host = host, 
-                              port = port)
-        
-        on.exit(DBI::dbDisconnect(con))
-        
-        
-        res <- RMySQL::fetch(RMySQL::dbSendQuery(myDB, glue::glue_sql("SELECT * 
-                                                            FROM users 
-                                                            WHERE user = {user} 
-                                                            AND password = {password}
-                                                            ", user = user, password = password, .con = con)))
-        if (nrow(res) > 0) {
-          list(result = TRUE, user_info = list(user = user, something = 123))
-        } else {
-          list(result = FALSE)
-        }
-      }
- }
- 
 
 # Data --------------------------------------------------------------------
 overview_statistics <- c(
@@ -68,6 +41,198 @@ overview_statistics <- c(
     "Total Expenditure",
     "Total Pupil FTE",
     "Total Expenditure per Pupil"
+)
+
+## Create vector of major stat categories for dropdown menus
+stat_categories <- c(
+    "Enrollment",
+    "Teachers/Classes",
+    "Salaries/Expenditure",
+    "10th Grade MCAS",
+    "SAT/AP",
+    "Basic Contract",
+    "Working Conditions",
+    "Student Population"
+)
+
+statistic_names_full <- c(
+    "District", # 1
+    "District Code",
+    "1st Year",
+    "Year",
+    "2nd Year",
+    "PK Enrollment",
+    "K Enrollment",
+    "G1 Enrollment",
+    "G2 Enrollment",
+    "G3 Enrollment", # 10
+    "G4 Enrollment",
+    "G5 Enrollment",
+    "G6 Enrollment",
+    "G7 Enrollment",
+    "G8 Enrollment",
+    "G9 Enrollment",
+    "G10 Enrollment",
+    "G11 Enrollment",
+    "G12 Enrollment",
+    "SP Enrollment", # 20
+    "Total Enrollment",
+    "Total Teacher FTE",
+    "% Teachers Licensed",
+    "Student:Teacher Ratio",
+    "% Teachers Experienced",
+    "% Teachers w/o Waiver",
+    "% Teachers Teaching in Field",
+    "Total Core Academic Classes",
+    "% Core Classes Taught by Exp Teachers",
+    "Total Salary", # 30
+    "Average Salary",
+    "In-District Expenditure",
+    "In-District Pupil FTE",
+    "In-District Expenditure per Pupil",
+    "Total Expenditure",
+    "Total Pupil FTE",
+    "Total Expenditure per Pupil",
+    "Students Advanced/Proficient in Science MCAS",
+    "% Students Advanced/Proficient in Science MCAS",
+    "Students Advanced in Science MCAS", # 40
+    "% Students Advanced in Science MCAS",
+    "Students Proficient in Science MCAS",
+    "% Students Proficient in Science MCAS",
+    "Students Need Imp Science MCAS",
+    "% Students Need Imp Science MCAS",
+    "Students Warning/Failing Science MCAS",
+    "% Students Warning/Failing Science MCAS",
+    "Students Taking Science MCAS",
+    "Students Advanced/Proficient in ELA MCAS",
+    "% Students Advanced/Proficient in ELA MCAS", # 50
+    "Students Advanced in ELA MCAS",
+    "% Students Advanced in ELA MCAS",
+    "Students Proficient in ELA MCAS",
+    "% Students Proficient in ELA MCAS",
+    "Students Need Imp ELA MCAS",
+    "% Students Need Imp ELA MCAS",
+    "Students Warning/Failing ELA MCAS",
+    "% Students Warning/Failing ELA MCAS",
+    "Students Taking ELA MCAS", # 60
+    "Students Advanced/Proficient in Math MCAS",
+    "% Students Advanced/Proficient in Math MCAS",
+    "Students Advanced in Math MCAS",
+    "% Students Advanced in Math MCAS",
+    "Students Proficient in Math MCAS",
+    "% Students Proficient in Math MCAS",
+    "Students Need Imp Math MCAS",
+    "% Students Need Imp Math MCAS",
+    "Students Warning/Failing Math MCAS",
+    "% Students Warning/Failing Math MCAS",
+    "Students Taking Math MCAS", # 70
+    "SAT Tests Taken",
+    "SAT Reading/Writing Score",
+    "SAT Math Score",
+    "AP Tests Taken",
+    "AP 1s",
+    "AP 2s",
+    "AP 3s",
+    "AP 4s",
+    "AP 5s",
+    "AP 1-2 %", # 80
+    "AP 3-5 %",
+    "Contract Length",
+    "Contract Y1",
+    "Contract Y2",
+    "Contract Y3",
+    "2015-16 COLA",
+    "2016-17 COLA",
+    "2017-18 COLA",
+    "2018-19 COLA",
+    "2019-20 COLA", # 90
+    "2020-21 COLA",
+    "2021-22 COLA",
+    "2022-23 COLA",
+    "2023-24 COLA",
+    "2015-16 Upper-Left Salary",
+    "2016-17 Upper-Left Salary",
+    "2017-18 Upper-Left Salary",
+    "2018-19 Upper-Left Salary",
+    "2019-20 Upper-Left Salary",
+    "2020-21 Upper-Left Salary", # 100
+    "2021-22 Upper-Left Salary",
+    "2022-23 Upper-Left Salary",
+    "2023-24 Upper-Left Salary",
+    "2015-16 Lower-Right Salary",
+    "2016-17 Lower-Right Salary",
+    "2017-18 Lower-Right Salary",
+    "2018-19 Lower-Right Salary",
+    "2019-20 Lower-Right Salary",
+    "2020-21 Lower-Right Salary",
+    "2021-22 Lower-Right Salary", # 110
+    "2022-23 Lower-Right Salary",
+    "2023-24 Lower-Right Salary",
+    "2015-16 Average Salary",
+    "2016-17 Average Salary",
+    "2017-18 Average Salary",
+    "2018-19 Average Salary",
+    "2019-20 Average Salary",
+    "2020-21 Average Salary",
+    "2021-22 Average Salary",
+    "2022-23 Average Salary", # 120
+    "2023-24 Average Salary",
+    "Contract Steps",
+    "Contract Lanes",
+    "Average Step % Increase",
+    "Last Step % Increase",
+    "Average Lane % Increase",
+    "Bachelors Masters % Increase",
+    "Masters Doctorate % Increase",
+    "Longevity Start Year",
+    "Longevity End Year", # 130
+    "Longevity Min Pay",
+    "Longevity Max Pay",
+    "# Days with Students",
+    "# Days w/o Students Teachers",
+    "# Days w/o Students Guidance",
+    "# Days w/o Students Nurses",
+    "Nurses Unionized",
+    "% Health Insurance Paid",
+    "Personal Days Annually",
+    "Personal Days Carry Over", # 140
+    "Personal Days Carry Over Max",
+    "Unused Personal Days Paid for",
+    "Unused Personal Days Paid for Rate",
+    "Sick Days",
+    "Sick Days Buy Back",
+    "Sick Days Buy Back Rate",
+    "Sick Leave Bank",
+    "Sick Leave Bank Cap",
+    "Bereavement Days",
+    "Religious Days", # 150
+    "Other Days",
+    "Comp for Attendance",
+    "Guidance Max Ratio High School",
+    "Max Class Size Ratio Elementary",
+    "Max Student Ratio High School",
+    "Special Ed Ratio Elementary",
+    "Special Ed Ratio High School",
+    "Children of Teachers Attending",
+    "Length of Workday Elementary",
+    "Length of Workday High School", # 160
+    "Early Retirement Incentives",
+    "Unit B",
+    "Tuition Reimbursement",
+    "Students 1st Language not English",
+    "% Students 1st Language not English",
+    "English Learners",
+    "% Students English Learners",
+    "Students w/ Disabilities",
+    "% Students Disabled",
+    "High-Need Students", # 170
+    "% Students High-Need",
+    "Low-Income Students",
+    "% Students Low-Income",
+    "DART Name",
+    "City",
+    "County",
+    "League"
 )
  
  color_palette <- c("darkred", "white", "darkgreen")
@@ -132,6 +297,8 @@ school_info <- readr::read_csv("school_info.csv") %>%
             district_name == "Greater Commonwealth Virtual District" ~ "Greenfield Commonwealth Virtual District",
             district_name == "Southern Worcester County Regional Vocational School District" ~ "Southern Worcester County Regional Vocational Technical",
             TRUE ~ district_name))
+
+axis_options <- purrr::set_names(colnames(school_info), statistic_names_full)
  
 district_options <- school_info %>% dplyr::pull(district_name) %>% unique()
  
@@ -269,10 +436,10 @@ ui <- shinyMobile::f7Page(
         navbar = shinyMobile::f7Navbar( title = tags$div(tags$img(src='https://raw.githubusercontent.com/SCasanova/arxed_ddd/main/www/Shield%20Trim.png',width='45px'),
                                                           tags$span(paste0("  ArxEd | D³ Data Driven Decisions"), style = 'text-align:center;')), 
                                         tags$div(htmlOutput('logo_src'), class = 'top-district-logo')),
-        tags$div(shinyMobile::f7Fab(
-         inputId = 'pass',
-         label = 'Change Password'
-         ), class =  'pass-button'),
+        # tags$div(shinyMobile::f7Fab(
+        #  inputId = 'pass',
+        #  label = 'Change Password'
+        #  ), class =  'pass-button'),
         tags$div(class = 'password-popup', shinyMobile::f7Popup(
          id = "popup1",
          title = tags$div(class = 'pass-title', h2("Change Password")),
@@ -294,9 +461,9 @@ ui <- shinyMobile::f7Page(
                            tags$div(
                                shinyMobile::f7SmartSelect(
                                    inputId = 'district',
-                                   label = tags$span(class = 'input-label', h4('1. Select Your District:')),
+                                   label = tags$span(class = 'input-label', h4('1. Click to Select Your District:')),
                                    choices = district_options,
-                                   selected = c('Concord-Carlisle'),
+                                   selected = 'Concord-Carlisle',
                                    virtualList = T,
                                    openIn = 'popup'
                                )
@@ -336,7 +503,7 @@ ui <- shinyMobile::f7Page(
                    tags$div(
                        shinyMobile::f7SmartSelect(
                            inputId = 'district_comps',
-                           label = tags$span(class = 'input-label', h4('5. View your comparison districts and add/remove any manually:')),
+                           label = tags$span(class = 'input-label', h4('5. Click to view your comparison districts and add/remove any manually:')),
                            multiple = T,
                            choices = district_options,
                            selected = tableOutput('district_comps_initial'),
@@ -500,9 +667,53 @@ ui <- shinyMobile::f7Page(
                 )
           ),
           shinyMobile::f7Tab(
+               tabName = "Plots",
+                icon = shinyMobile::f7Icon("chart_bar"),
+                active = F,
+               tags$div(
+                   shinyMobile::f7Button(
+                     inputId = 'down_plot',
+                     label = tags$span(tags$i(class = 'fas fa-camera'), tags$span('Donwload as Image')) #fas fa classes corresponf to fontawesome
+                   ),
+                   class = "other-button card-button2"
+               ), tags$div(
+                 style = 'display:flex',
+                 tags$div(
+                   style = 'width:20%;',
+                   shinyMobile::f7Shadow(
+                     hover = T,
+                     intensity = 16,
+                     shinyMobile::f7Card(
+                       shinyMobile::f7Select(
+                         'plot_type',
+                         label = h2("Plot Type"), 
+                         choices = c("Bar","Scatter","Pie")
+                       ),
+                       uiOutput('y_cat_disp'),
+                       uiOutput('y_var_disp'),
+                       uiOutput('x_cat_disp'),
+                       uiOutput('x_var_disp')
+                     )
+                   )
+                 ),
+                 tags$div(
+                   style = 'width:80%;',
+                   id = 'plot_card',
+                   shinyMobile::f7Shadow(
+                     hover = T,
+                     intensity = 16,
+                     shinyMobile::f7Card(
+                       plotly::plotlyOutput('userplot', height = 'auto')
+                     )
+                   )
+                   
+                 )
+               )
+          ), 
+          shinyMobile::f7Tab(
                tabName = "Students",
                 icon = shinyMobile::f7Icon("person_3"),
-                active = TRUE,
+                active = F,
                 tags$div(
                    shinyMobile::f7Button(
                      inputId = 'down_students',
@@ -600,7 +811,7 @@ ui <- shinyMobile::f7Page(
           shinyMobile::f7Tab(
                tabName = "Finances",
                 icon = shinyMobile::f7Icon("money_dollar"),
-                active = TRUE,
+                active = F,
                tags$div(
                    shinyMobile::f7Button(
                      inputId = 'down_finances',
@@ -624,7 +835,7 @@ ui <- shinyMobile::f7Page(
           shinyMobile::f7Tab(
                tabName = "Academic",
                 icon = shinyMobile::f7Icon("book"),
-                active = TRUE,
+                active = F,
                tags$div(
                    shinyMobile::f7Button(
                      inputId = 'down_academic',
@@ -636,7 +847,7 @@ ui <- shinyMobile::f7Page(
           shinyMobile::f7Tab(
                tabName = "Work Cond.",
                 icon = shinyMobile::f7Icon("briefcase"),
-                active = TRUE,
+                active = F,
                tags$div(
                    shinyMobile::f7Button(
                      inputId = 'down_work',
@@ -671,7 +882,6 @@ ui <- shinyMobile::f7Page(
       )
     )
 )
- 
 
 # Server ------------------------------------------------------------------
 
@@ -727,7 +937,7 @@ ui <- shinyMobile::f7Page(
             unique()
       } 
        else if('League'  %in% input$comp_cond){
-           query <- aste0("SELECT district_name  
+           query <- paste0("SELECT district_name  
                           FROM district_info 
                           WHERE league =", "'",  league(),"';") 
            
@@ -885,6 +1095,19 @@ output$salary_condition <- renderUI({
       )
     })
   
+  
+  observeEvent(input$save, {
+      for(i in 1:dim(comp_districts())){
+      query <- paste0("REPLACE INTO custom_schools VALUES ('",
+                      paste0(active_user(), i),"',",
+                      "'", active_user(),
+                      "'", comp_districts()[i], "',",
+                      ");"  )
+      RMySQL::dbSendQuery(myDB,query)
+    }
+    })
+  
+  
  # Plot DF for multiple use ------------------------------------------------
 
 plot_comp_df <- reactive({
@@ -943,6 +1166,7 @@ summary_gt <- reactive({
   
   # Title of home panel
     output$district_at_glance <- renderUI({
+      req(district())
       
       len_comps <- length(comp_districts())
         
@@ -967,11 +1191,13 @@ summary_gt <- reactive({
     })
     
     output$comp_2 <- renderUI({
+      req(district())
       tags$div(class = 'comparison',
           tags$span(paste0(district()), style = "color:#DB9743"), " vs All Available Districts")
     })
     
     plot_all_data <- reactive({
+      req(district())
       school_info %>%
             dplyr::mutate(is_district = ifelse(district_name == district(), district(), "Others")) %>%
             dplyr::group_by(is_district) %>%
@@ -986,6 +1212,7 @@ summary_gt <- reactive({
     })
     
     cola_all_data <- reactive({
+      req(district())
       plot_all_data() %>% 
         dplyr::select(cola_2020_21:cola_2022_23) %>% 
         t() %>%
@@ -995,6 +1222,7 @@ summary_gt <- reactive({
     })
     
     output$cola_plot_all <- plotly::renderPlotly({
+      req(district())
       plotly::plot_ly(
         cola_all_data(),
         x = ~other,
@@ -1024,6 +1252,7 @@ summary_gt <- reactive({
   })
     
   upper_left_data <- reactive({
+    req(district())
       plot_all_data() %>% 
         dplyr::select(upper_left_2020_21:upper_left_2022_23) %>% 
         t() %>%
@@ -1033,6 +1262,7 @@ summary_gt <- reactive({
     })
     
     output$upper_left <- plotly::renderPlotly({
+      req(district())
       plotly::plot_ly(
         upper_left_data(),
         x = ~other,
@@ -1062,6 +1292,7 @@ summary_gt <- reactive({
   })
     
   lower_right_data <- reactive({
+    req(district())
       plot_all_data() %>% 
         dplyr::select(lower_right_2020_21:lower_right_2022_23) %>% 
         t() %>%
@@ -1071,6 +1302,7 @@ summary_gt <- reactive({
     })
     
     output$lower_right <- plotly::renderPlotly({
+      req(district())
       plotly::plot_ly(
         lower_right_data(),
         x = ~other,
@@ -1100,6 +1332,7 @@ summary_gt <- reactive({
   })
     
   average_salary_data <- reactive({
+    req(district())
       plot_all_data() %>% 
         dplyr::select(salary_avg_2020_21:salary_avg_2022_23) %>% 
         t() %>%
@@ -1110,6 +1343,7 @@ summary_gt <- reactive({
   
     
     output$average_salary_yearly <- plotly::renderPlotly({
+      req(district())
       plotly::plot_ly(
         average_salary_data(),
         y = ~other,
@@ -1136,6 +1370,8 @@ summary_gt <- reactive({
           font = list(size = 12)
         )
   })
+#here start all the plots that depend on the comparison districts
+
     
     budget_data <- reactive({
       plot_comp_df() %>% 
@@ -1503,12 +1739,15 @@ summary_gt <- reactive({
       )
   })
   
-  
+  #Screenshots
   observeEvent(input$down_home, { #take "screenshot" of home selector
     shinyscreenshot::screenshot(selector = '#home-plots' , filename = paste(comp_year(), district(), 'Home.png'), scale = 4)
   })
   observeEvent(input$down_overview, { #take "screenshot" of  selector
-    shinyscreenshot::screenshot(selector = '#overview_table' , filename =  paste(comp_year(), district(),'Student Page.png'), scale = 4)
+    shinyscreenshot::screenshot(selector = '#overview_table' , filename =  paste(comp_year(), district(),'Overview Table.png'), scale = 4)
+  })
+  observeEvent(input$down_plot, { #take "screenshot" of  selector
+    shinyscreenshot::screenshot(selector = '#plot_card' , filename =  paste(comp_year(), district(),'Custom Plot.png'), scale = 4)
   })
   observeEvent(input$down_students, { #take "screenshot" of  selector
     shinyscreenshot::screenshot(selector = '#students' , filename =  paste(comp_year(), district(),'Student Page.png'), scale = 4)
@@ -1953,6 +2192,247 @@ summary_gt <- reactive({
     # Actually render the {gt} table (need {gt} object to save in next function)
     output$comparisons_table <- gt::render_gt({comp_table()})
   
+
+# Plots -------------------------------------------------------------------
+
+output$x_cat_disp <- renderUI({
+    req(input$plot_type)
+    if(input$plot_type == 'Scatter'){
+      shinyMobile::f7Select(
+            "x_cat",
+            label = h3("X-Axis Category"),
+            choices = stat_categories
+      )
+    } else{
+      
+    } 
+    })
+    
+output$x_var_disp <- renderUI({
+    req(input$plot_type)
+    if(input$plot_type == 'Scatter'){
+      shinyMobile::f7Select(
+            "x_cat",
+            label = h3("X-Axis Variable"),
+            choices = c('')
+      )
+    } else{
+      
+    } 
+    })
+    
+output$y_cat_disp <- renderUI({
+    req(input$plot_type)
+      shinyMobile::f7Select(
+         'y_cat',
+         label = h3("Y-Axis Category"), 
+         choices = stat_categories
+       )
+    })
+
+output$y_var_disp <- renderUI({
+    req(input$plot_type)
+      shinyMobile::f7Select(
+         'y_var',
+         label = h3("Y-Axis Variable"), 
+         choices = c('')
+       )
+    })
+
+output$x_var_disp <- renderUI({
+  req(input$x_cat)
+  if(input$plot_type == 'Scatter'){
+    if (input$x_cat == "Enrollment") {
+    shinyMobile::f7Select("x_var",h3('X-Axis Variable'), choices = axis_options[6:21])
+  }
+  else if (input$x_cat == "Teachers/Classes") {
+    shinyMobile::f7Select("x_var",h3('X-Axis Variable'), choices = axis_options[22:29])
+  }
+  else if (input$x_cat == "Salaries/Expenditure") {
+    shinyMobile::f7Select("x_var",h3('X-Axis Variable'), choices = axis_options[30:37])
+  }
+  else if (input$x_cat == "10th Grade MCAS") {
+    shinyMobile::f7Select("x_var",h3('X-Axis Variable'), choices = axis_options[38:70])
+  }
+  else if (input$x_cat == "SAT/AP") {
+    shinyMobile::f7Select("x_var",h3('X-Axis Variable'), choices = axis_options[71:81])
+  }
+  else if (input$x_cat == "Basic Contract") {
+    shinyMobile::f7Select("x_var",h3('X-Axis Variable'), choices = axis_options[82:132])
+  }
+  else if (input$x_cat == "Working Conditions") {
+    shinyMobile::f7Select("x_var",h3('X-Axis Variable'), choices = axis_options[133:163])
+  }
+  else if (input$x_cat == "Student Population") {
+    shinyMobile::f7Select("x_var",h3('X-Axis Variable'), choices = axis_options[164:173])
+  }
+  }
+})
+
+output$y_var_disp <- renderUI({
+  req(input$y_cat)
+  if (input$y_cat == "Enrollment") {
+    shinyMobile::f7Select("y_var", h3('Y-Axis Variable'), choices = axis_options[6:21])
+  }
+  else if (input$y_cat == "Teachers/Classes") {
+    shinyMobile::f7Select("y_var",h3('Y-Axis Variable'), choices = axis_options[22:29])
+  }
+  else if (input$y_cat == "Salaries/Expenditure") {
+    shinyMobile::f7Select("y_var",h3('Y-Axis Variable'), choices = axis_options[30:37])
+  }
+  else if (input$y_cat == "10th Grade MCAS") {
+    shinyMobile::f7Select("y_var",h3('Y-Axis Variable'), choices = axis_options[38:70])
+  }
+  else if (input$y_cat == "SAT/AP") {
+    shinyMobile::f7Select("y_var",h3('Y-Axis Variable'), choices = axis_options[71:81])
+  }
+  else if (input$y_cat == "Basic Contract") {
+    shinyMobile::f7Select("y_var",h3('Y-Axis Variable'), choices = axis_options[82:132])
+  }
+  else if (input$y_cat == "Working Conditions") {
+    shinyMobile::f7Select("y_var",h3('Y-Axis Variable'), choices = axis_options[133:163])
+  }
+  else if (input$y_cat == "Student Population") {
+    shinyMobile::f7Select("y_var",h3('Y-Axis Variable'), choices = axis_options[164:173])
+  }
+})
+
+y <- reactive(input$y_var)
+x <- reactive(input$x_var)
+
+# Put data in df to build plots
+plotdata <- reactive({
+  plot_data <- school_info %>%
+    dplyr::filter(
+      district_name %in% comp_districts() | district_name == district(),
+      year == comp_year(),
+      !is.na(get(y()))
+    ) %>%
+    dplyr::mutate(
+      is_district = ifelse(district_name == district(), district(), "Others"),
+      short_district = stringr::str_trunc(district_name, 20, "right")
+    )
+})
+output$userplot <- plotly::renderPlotly({
+        
+        
+        if (input$plot_type == "Scatter"){
+          req(x())
+          req(y())
+            
+            x <- plotdata() %>% dplyr::pull(x())
+            y <- plotdata() %>% dplyr::pull(y())
+
+            plotly::plot_ly(
+                x = x,
+                y = y,
+                type = "scatter",
+                mode = "markers",
+                marker = list(
+                    size = 30,
+                    opacity = .5
+                ),
+                color = plotdata()$short_district,
+                colors = ggsci::pal_jco()(10),
+                hovertemplate = paste((plotdata() %>% dplyr::pull(district_name)),
+                                      "<br>",
+                                      names(axis_options)[axis_options == x()], ":",
+                                      (plotdata() %>% dplyr::pull(x())),
+                                      "<br>",
+                                      names(axis_options)[axis_options == y()], ":",
+                                      (plotdata() %>% dplyr::pull(y())),
+                                      "<extra></extra>"),
+                height = 630) %>%
+                plotly::layout(yaxis = list(title = names(axis_options)[axis_options == y()], fixedrange = T),
+                       xaxis = list(title = names(axis_options)[axis_options == x()], fixedrange = T),
+                       title = paste0(district(), " vs. Comparison Districts",
+                                     "<br><sup>", names(axis_options)[axis_options == y()],
+                                     "vs.", names(axis_options)[axis_options == x()], input$comp_year, "</sup>"),
+                       images = list(
+                           source = base64enc::dataURI(file = "https://raw.githubusercontent.com/SCasanova/arxed_ddd/main/www/Shield%20Trim.png"),
+                           x = 0, y = 1,
+                           sizex = 0.2, sizey = 0.1
+                       ))
+            
+        }
+        
+        else if (input$plot_type == "Pie"){
+          req(y())
+            
+            y <- plotdata() %>% dplyr::pull(y())
+            x <- factor(plotdata() %>% dplyr::pull(district_name), levels = unique(plotdata() %>% dplyr::pull(district_name))[order(plotdata() %>% dplyr::pull(y()))])
+            y_mean <- mean(y, na.rm = T)
+            
+            plotly::plot_ly(
+                labels = x,
+                values = y,
+                marker = list(colors = ggsci::pal_jco()(10)),
+                textinfo='label+percent',
+                hovertemplate = paste((plotdata() %>% dplyr::pull(district_name)),
+                                      "<br>",
+                                      names(axis_options)[axis_options == y()], ":",
+                                      y, "<extra></extra>"),
+                height = 630) %>%
+              plotly::add_pie(hole = 0.4) %>% 
+                plotly::layout(title = paste0(district(), " vs. Comparison Districts",
+                                     "<br><sup>", names(axis_options)[axis_options == y()], input$comp_year, "</sup>"),
+                               margin = list(l = 50,r = 50,b = 50,t = 50,pad = 4), 
+                       legend = list(font = list(size = 11)),
+                       images = list(
+                           source = base64enc::dataURI(file = "https://raw.githubusercontent.com/SCasanova/arxed_ddd/main/www/Shield%20Trim.png"),
+                           x = 0.1, y = 1,
+                           sizex = 0.2, sizey = 0.1
+                       ))
+            
+        }
+        
+        else{
+          req(y())
+            
+            y <- plotdata() %>% dplyr::pull(y())
+            x <- factor(plotdata() %>% dplyr::pull(district_name), levels = unique(plotdata() %>% dplyr::pull(district_name))[order(plotdata() %>% dplyr::pull(y()))])
+            district_short <- factor(plotdata() %>% dplyr::pull(short_district), levels = unique(plotdata() %>% dplyr::pull(short_district))[order(plotdata() %>% dplyr::pull(y()))])
+            y_mean <- mean(y, na.rm = T)
+            
+            plotly::plot_ly(
+                x = x,
+                y = y,
+                type = "bar",
+                color = district_short,
+                colors = ggsci::pal_jco()(10),
+                hovertemplate = paste((plotdata() %>% dplyr::pull(district_name)),
+                                      "<br>",
+                                      names(axis_options)[axis_options == y()], ":",
+                                      y, "<extra></extra>"),
+                texttemplate = '%{y:.2f}', textposition = 'outside',
+                height = 630) %>%
+                plotly::layout(xaxis = list(title = "District", showticklabels = F, fixedrange = T),
+                       yaxis = list(title = names(axis_options)[axis_options == y()] , fixedrange = T),
+                       title = paste0(district(), " vs. Comparison Districts",
+                                     "<br><sup>", names(axis_options)[axis_options == y()], input$comp_year, "</sup>"),
+                       legend = list(font = list(size = 11)),
+                       annotations = list(
+                           x = sort(x)[1],
+                           y = y_mean,
+                           text = paste("Avg:", round(y_mean,1)),
+                           xref = "x",
+                           yref = "y",
+                           showarrow = TRUE,
+                           arrowhead = 7,
+                           ax = 20,
+                           ay = -40
+                       ),
+                       shapes = list(type='line', x0 = sort(x)[1], x1 = sort(x)[nrow(plotdata())], y0=y_mean, y1=y_mean, line=list(dash='dot', width=1)),
+                       images = list(
+                           source = base64enc::dataURI(file = "https://raw.githubusercontent.com/SCasanova/arxed_ddd/main/www/Shield%20Trim.png"),
+                           x = 0, y = 1,
+                           sizex = 0.2, sizey = 0.1
+                       ))
+            
+        }
+        
+    })
+        
 # Students ----------------------------------------------------------------
 
     student_comp <- reactive({
