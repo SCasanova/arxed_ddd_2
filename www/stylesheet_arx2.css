@@ -100,6 +100,10 @@ div{
    background-color: #2a3a6e;
 }
 
+#toggle_menu {
+  background-color: gray;
+}
+
 .other-button{
   width:16%;
   padding:10px;
@@ -213,9 +217,21 @@ div{
  color: #DB9743;
  font-size: 118%;
  text-align: left;
+ align-items: flex-start;
 }
 
 .shiny-html-output {
   margin:0;
   padding:0;
+}
+
+
+.test {
+  border-color: black;
+  border-style: solid;
+}
+
+.answer-text{
+  position:absolute;
+  font-size: 120px;
 }

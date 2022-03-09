@@ -21,6 +21,36 @@ sqlQuery <- function (query) {
   result
 }
 
+# Credential manager ------------------------------------------------------
+
+ check_creds <- function(dbname, host, port, db_user, db_password) {
+
+  function(user, password) {
+    
+    con <- DBI::dbConnect(RMySQL::MySQL(), 
+                          dbname = dbname, 
+                          user = db_user, 
+                          password = db_password,
+                          host = host, 
+                          port = port)
+    
+    on.exit(DBI::dbDisconnect(con))
+    
+    
+    res <- DBI::fetch(DBI::dbSendQuery(con, glue::glue_sql("SELECT * 
+                            FROM users_2 
+                            WHERE user = {user} 
+                            AND password = {password}
+                            ", user = user, password = password, .con = con)))
+    
+    if (nrow(res) > 0) {
+      list(result = TRUE, user_info = list(user = user, something = 123))
+    } else {
+      list(result = FALSE)
+    }
+  }
+}
+
 
 # Data --------------------------------------------------------------------
 overview_statistics <- c(
@@ -428,6 +458,7 @@ dart <- readr::read_csv("all_dart.csv") %>%
 ui <- shinyMobile::f7Page(
     title = paste0("  ArxEd | D³ Data-Driven Decisions"),
     options = list(dark = F),
+    shinyjs::useShinyjs(),
     tags$script(src = "myscript.js"),
     shinyMobile::f7SingleLayout(
         tags$head(
@@ -438,10 +469,10 @@ ui <- shinyMobile::f7Page(
         navbar = shinyMobile::f7Navbar( title = tags$div(tags$img(src='https://raw.githubusercontent.com/SCasanova/arxed_ddd/main/www/Shield%20Trim.png',width='45px'),
                                                           tags$span(paste0("  ArxEd | D³ Data Driven Decisions"), style = 'text-align:center;')), 
                                         tags$div(htmlOutput('logo_src'), class = 'top-district-logo')),
-        # tags$div(shinyMobile::f7Fab(
-        #  inputId = 'pass',
-        #  label = 'Change Password'
-        #  ), class =  'pass-button'),
+        tags$div(shinyMobile::f7Fab(
+         inputId = 'pass',
+         label = 'Change Password'
+         ), class =  'pass-button'),
         tags$div(class = 'password-popup', shinyMobile::f7Popup(
          id = "popup1",
          title = tags$div(class = 'pass-title', h2("Change Password")),
@@ -457,25 +488,27 @@ ui <- shinyMobile::f7Page(
                shinyMobile::f7Shadow(
                    hover = T,
                    intensity = 16,
-                   shinyMobile::f7Card(tags$div(
+                   shinyMobile::f7Card(
+                     tags$div( id = 'menu-card',
+                       tags$div(
                        style = 'display:flex',
                        tags$div(
                            tags$div(
-                               shinyMobile::f7SmartSelect(
+                               shinyMobile::f7AutoComplete(
                                    inputId = 'district',
                                    label = tags$span(class = 'input-label', h4('1. My School District')),
                                    choices = district_options,
-                                   selected = 'Winthrop',
-                                   virtualList = T,
-                                   openIn = 'popup'
+                                   value = 'Winthrop',
+                                   openIn = 'popup',
+                                   closeOnSelect = T
                                )
                            ),
                            tags$div(
                                shinyMobile::f7Select(
                                    inputId = 'year',
                                    label = tags$span(class = 'input-label', h3('2. School Year:')),
-                                   choices = c('2015-16', '2016-17', '2017-18', '2018-19', '2019-20', '2020-21', '2021-22'),
-                                   selected = '2020-21'
+                                   choices = c('2020-21', '2021-22', '2019-20', '2018-19', '2017-18', '2016-17', '2015-16'),
+                                   selected = "2020-21"
                                    
                                )
                            ),
@@ -486,7 +519,7 @@ ui <- shinyMobile::f7Page(
                            shinyMobile::f7CheckboxGroup(
                                inputId = 'comp_cond',
                                label = h5('3. Comparison School Districts:'),
-                               choices = c('DART', 'League', 'County', 'Municipality')
+                               choices = c('DART', 'League', 'County', 'My Schools')
                                )
                        ),
                        tags$div(
@@ -503,16 +536,10 @@ ui <- shinyMobile::f7Page(
                        )
                    ),
                    tags$div(
-                       shinyMobile::f7SmartSelect(
-                           inputId = 'district_comps',
-                           label = tags$span(class = 'input-label', h4('5. Click to view your comparison districts and add/remove any manually:')),
-                           multiple = T,
-                           choices = district_options,
-                           selected = tableOutput('district_comps_initial'),
-                           openIn = 'popup',
-                           virtualList = T
-                       )
-                   ),
+                     selectizeInput("district_comps",
+                                            label = tags$span(class = 'input-label', h3('5. View your comparison districts and add/remove any manually:')),
+                                            choices = district_options, multiple = TRUE, width = '100%')
+                   )),
                    footer = tagList(
                              tags$div(style= 'display:flex;', tags$div(
                                  shinyMobile::f7Button( #calls for DB replacing 
@@ -532,7 +559,15 @@ ui <- shinyMobile::f7Page(
                                  type = 'button',
                                  class = 'button f7-action-button button-fill',
                                  onclick = 'uncheck("comp_cond")',
-                                 'Reset District'
+                                 'Reset Districts'
+                               ),class = 'card-button',
+                             ),
+                             tags$div(
+                               tags$button(
+                                 id=  'toggle_menu',
+                                 type = 'button',
+                                 class = 'button f7-action-button button-fill',
+                                 'Toggle Menu Card'
                                ),class = 'card-button',
                              )
                              )
@@ -834,7 +869,8 @@ ui <- shinyMobile::f7Page(
                      style = 'display:flex',
                      tags$div(
                        style = 'width:33%',
-                       plotly::plotlyOutput('nurses_union_plot')
+                       plotly::plotlyOutput('nurses_union_plot'),
+                       htmlOutput('district_union_output')
                      ),
                      tags$div(
                        style = 'width:33%',
@@ -913,11 +949,32 @@ ui <- shinyMobile::f7Page(
     )
 )
 
+ui <- shinymanager::secure_app(ui)
+
 # Server ------------------------------------------------------------------
 
  
 
  server <- function(input, output, session) {
+   
+   #Info credential validation 
+
+    res_auth <- shinymanager::secure_server(
+    check_credentials = check_creds(
+      dbname = "sys",
+      host = "arxed-sal.cnlnwcegporn.us-east-1.rds.amazonaws.com",
+      port = 8209,
+      db_user = "admin",
+      db_password = "ArxEd01742!"
+    )
+    )
+
+  auth_output <- reactive({
+    reactiveValuesToList(res_auth)
+  })
+
+  active_user <- reactive(stringr::str_remove_all(auth_output()$user, "[\r\n]"))
+  
      
      district <- reactive(input$district)
      comp_year <- reactive(input$year)
@@ -928,7 +985,47 @@ ui <- shinyMobile::f7Page(
              alt = "")
     })
      
+     # Change password logic ---------------------------------------------------
+  
+  observeEvent(input$pass, { #Observe for submit button. If passwords match, update on server. If not, notify user
+     shinyMobile::updateF7Popup(id = "popup1")
+    })
+  
+  observeEvent(input$submit_pass, {
+    if(input$newPassConf == input$newPass){
+      
+      query <- glue::glue("UPDATE users_2
+                           SET password = '{password}'
+                           WHERE user = '{user}';
+                           ", user = active_user(), password = input$newPass)
+      sqlQuery(query)
+      
+      shinyMobile::f7Notif(
+            text = "Your password has succesfully changed",
+            icon = shinyMobile::f7Icon("checkmark_alt_circle"),
+            title = "Password Updated",
+            titleRightText = "now",
+            closeTimeout = 5500,
+            closeButton = F
+      )
+
+    }else {
+      shinyMobile::f7Notif(
+            text = "Passwords don't match. Please try again",
+            icon = shinyMobile::f7Icon("xmark_circle"),
+            title = "Update Error",
+            titleRightText = "now",
+            closeTimeout = 5500,
+            closeButton = T
+      )
+    }
+     
+    })
+  
+
+     
      league <- reactive({
+       req(district())
       query <- paste0("SELECT league  
                         FROM district_info 
                         WHERE district_name =", "'",  district(),"';")
@@ -938,6 +1035,7 @@ ui <- shinyMobile::f7Page(
         as.character()
   })
      county <- reactive({
+       req(district())
       query <- paste0("SELECT county  
                         FROM district_info 
                         WHERE district_name =", "'",  district(),"';")
@@ -945,32 +1043,27 @@ ui <- shinyMobile::f7Page(
         unique() %>% 
         as.character()
   })
-     municipality <- reactive({
-      query <- paste0("SELECT municipality  
-                        FROM district_info 
-                        WHERE district_name =", "'",  district(),"';") 
-      sqlQuery(query) %>% 
-        unique() %>% 
-        as.character()
-  })
-     
 
    comp_districts <- reactive({
+     req(district())
      input$district_comps
      })
      
      district_logo <- reactive({ #access district table to get name and logo associated with district
+       req(district())
        query <- paste0("SELECT logo  
                         FROM districts 
                         WHERE district_name =", "'",  district(),"';")
       
        sqlQuery(query) %>% 
+         unique() %>% 
             as.character()
        
   })
 
   
-  output$logo_src <- renderUI(
+  output$logo_src <- renderUI({
+    req(district())
     tags$div(
       style = 'display:flex',
       tags$div(
@@ -982,8 +1075,11 @@ ui <- shinyMobile::f7Page(
       )
     )
     
-  )
+  })
   
+  observeEvent(input$toggle_menu, {
+        shinyjs::toggle(id = "menu-card")
+    })
   
   output$budget_condition <- renderUI({
     if('Total Budget' %in% input$comp_filter){
@@ -1061,6 +1157,7 @@ district_comps_step_1 <- reactive({
                             FROM district_info 
                             WHERE county =", "'",  county(),"';")
           sqlQuery(query) %>% 
+            dplyr::filter(district_name != district()) %>% 
             dplyr::pull(district_name) %>% 
             unique()
       } 
@@ -1070,18 +1167,20 @@ district_comps_step_1 <- reactive({
                           WHERE league =", "'",  league(),"';") 
            
            sqlQuery(query) %>% 
+             dplyr::filter(district_name != district()) %>% 
             dplyr::pull(district_name) %>% 
             unique()
        } 
-       else if('Municipality'  %in% input$comp_cond){
-           query <- paste0("SELECT district_name  
-                            FROM district_info
-                            WHERE municipality =", "'",  municipality(),"';")
-          
-           sqlQuery(query) %>% 
-            dplyr::pull(district_name) %>% 
-            unique()
-       } else if('DART'  %in% input$comp_cond){
+       # else if('My Schools'  %in% input$comp_cond){
+       #     query <- paste0("SELECT school  
+       #                      FROM custom_schools
+       #                      WHERE user =", "'",  active_user(),"';")
+       #    
+       #     sqlQuery(query) %>% 
+       #      dplyr::pull(school) %>% 
+       #      unique()
+       # } 
+      else if('DART'  %in% input$comp_cond){
            # Get data frame with DART names and district names
             dart_names <- school_info %>%
                 dplyr::select(district_name, dart_name) %>%
@@ -1114,96 +1213,103 @@ district_comps_step_1 <- reactive({
       
   })
 
-observe(print(input$budget))
-observe(print(input$budget[1]))
-observe(print(length(input$budget[1] *1000)))
+budget_hi <- reactive({
+  if(length(input$budget[2]) ==0){
+    1000000000000000
+  } else{
+    input$budget[2] * 1000000
+  }
+  })
+budget_lo <- reactive({
+  if(length(input$budget[1])==0){
+    0
+  }else{
+    input$budget[1] * 1000000
+  }
+  })
 
+enrollment_hi <- reactive({
+  if(length(input$enrollment[2]) == 0){
+    10000000
+  } else{
+    input$enrollment[2] * 100
+  }
+  })
+enrollment_lo <- reactive({
+  if(length(input$enrollment[1]) == 0){
+    0
+  }else{
+    input$enrollment[1] * 100
+  }
+  })
+fte_hi <- reactive({
+  if(length(input$fte[2]) == 0){
+    1000000
+  } else{
+    input$fte[2]
+  }
+  })
+fte_lo <- reactive({
+  if(length(input$fte[1]) == 0){
+    0
+  } else{
+    input$fte[1]
+  }
+  })
+salary_hi <- reactive({
+  if(length(input$salary[2]) == 0){
+    100000000
+  } else {
+    input$salary[2] * 1000
+  }
+  })
+salary_lo <- reactive({
+  if(length(input$salary[1]) == 0){
+    0
+  } else {
+    input$salary[1] * 1000
+  }
+  })
 
-
-district_comps_initial <- reactive({
-  selected_districts = district_comps_step_1()
-  budget_hi <- input$budget[2] * 1000000
-  budget_lo <- input$budget[1] * 1000000
-
-     if (length(selected_districts) > 0 & "Total Budget" %in% input$comp_filter){
-       req(input$budget)
-
-       selected_districts <- school_info %>%
-         dplyr::filter(
-           district_name %in% selected_districts &
-           year %in% input$comp_year &
-           total_exp >= input$budget[1] * 1000000 &
-            total_exp >= input$budget[2] * 1000000 &
-           !is.na(total_exp)
-         ) %>%
-         dplyr::distinct() %>%
-         dplyr::pull(district_name)
-
-     }
-     if (length(selected_districts) > 0 & "Enrollment" %in% input$comp_filter){
-       enrollment_hi <- input$enrollment[2] * 100
-       enrollment_lo <- input$enrollment[1] * 100
-
-       selected_districts <- school_info %>%
-         dplyr::filter(
-           district_name %in% selected_districts,
-           year %in% input$comp_year,
-           dplyr::between(total_enrollment, enrollment_lo, enrollment_hi),
-           !is.na(total_enrollment)
-         ) %>%
-         dplyr::distinct() %>%
-         dplyr::pull(district_name)
-     }
-     if (length(selected_districts) > 0 & "Teacher FTE" %in% input$comp_filter){
-       fte_hi <- input$fte[2]
-       fte_lo <- input$fte[1]
-       selected_districts <- school_info %>%
-         dplyr::filter(
-           district_name %in% selected_districts,
-           year %in% input$comp_year,
-           dplyr::between(total_teachers, fte_lo, fte_hi),
-           !is.na(total_teachers)
-         ) %>%
-         dplyr::distinct() %>%
-         dplyr::pull(district_name)
-     }
-     if (length(selected_districts) > 0 & "Avg Teacher Salary" %in% input$comp_filter){
-       salary_hi <- input$salary[2] * 1000
-       salary_lo <- input$salary[1] * 1000
-
-       selected_districts <- school_info %>%
-         dplyr::filter(
-           district_name %in% selected_districts,
-           year %in% input$comp_year,
-           dplyr::between(average_salary, salary_lo, salary_hi),
-           !is.na(average_salary)
-         ) %>%
-         dplyr::distinct() %>%
-         dplyr::pull(district_name)
-     }
-  selected_districts
-
+district_comps_step_2 <- reactive({
+  school_info %>%
+    dplyr::filter(
+      total_exp >= budget_lo() &
+        total_exp <= budget_hi() &
+        total_enrollment >= enrollment_lo() &
+        total_enrollment <= enrollment_hi() &
+        total_teachers >= fte_lo() &
+        total_teachers <= fte_hi()
+    ) %>%
+    dplyr::pull(district_name) %>%
+    unique()
+  
 })
 
-observeEvent(list(input$comp_cond, input$comp_filter), {
-      shinyMobile::updateF7SmartSelect(
-        inputId = "district_comps",
-        openIn = "popup",
-        virtualList = T,
-        selected = district_comps_initial(),
-        choices = district_options,
-        multiple = TRUE
-      )
+district_comps_initial <- reactive({
+  intersect(district_comps_step_1(),district_comps_step_2())
+})
+
+# observe(print(district_comps_step_1()))
+# observe(print(district_comps_step_2()))
+# observe(print(district_comps_initial()))
+
+
+observeEvent(list(input$comp_cond, input$comp_filter, input$salary, input$budget, input$fte, input$enrollment), {
+      # shinyMobile::updateF7AutoComplete(
+      #   inputId = "district_comps",
+      #   value = district_comps_initial()
+      # )
+  updateSelectizeInput(
+     inputId = "district_comps",
+     selected = district_comps_initial()
+  )
     })
   
   observeEvent(input$reset, {
-      shinyMobile::updateF7SmartSelect(
+      updateSelectizeInput(
         inputId = "district_comps",
-        openIn = "popup",
-        selected = "",
-        choices = district_options,
-        multiple = TRUE,
-        virtualList = T
+        selected = ""
       )
     })
   
@@ -1211,16 +1317,20 @@ observeEvent(list(input$comp_cond, input$comp_filter), {
 
   
   # observeEvent(input$save, {
+  #   query <- paste0("DELETE FROM custom_schools
+  #                   WHERE user =", "'", active_user(), "'",  ";")
+  #   sqlQuery(query)
+  # 
   #     for(i in 1:dim(comp_districts())){
   #     query <- paste0("REPLACE INTO custom_schools VALUES ('",
   #                     paste0(active_user(), i),"',",
   #                     "'", active_user(),
   #                     "'", comp_districts()[i], "',",
   #                     ");"  )
-  #     RMySQL::dbSendQuery(myDB,query)
+  #     sqlQuery(query)
   #   }
   #   })
-  
+
   
  # Plot DF for multiple use ------------------------------------------------
 
@@ -1260,10 +1370,8 @@ summary_gt <- reactive({
             dplyr::mutate(
                 total_enrollment = paste("Enrollment:", total_enrollment),
                 total_teachers = paste("Teacher FTE:", total_teachers),
-                year = paste("Year:", year),
-                league = paste('League:', league),
-                county =  paste('League:', county),
-                city =  paste('Municipality:', city)) %>%
+                year = paste("Year:", year)
+                ) %>%
             dplyr::select(year, total_enrollment, total_teachers) %>%
             t() %>%
             as.data.frame()
@@ -1392,7 +1500,7 @@ summary_gt <- reactive({
       plotly::plot_ly(
         upper_left_data(),
         x = ~Others,
-        y = ~ c('2022-23', '2021-22', '2020-21'),
+        y = ~ c('2020-21', '2021-22', '2022-23'),
         type = 'bar',
         name = 'A',
         orientation = 'h',
@@ -1434,7 +1542,7 @@ summary_gt <- reactive({
       plotly::plot_ly(
         lower_right_data(),
         x = ~Others,
-        y = ~ c('2022-23', '2021-22', '2020-21'),
+        y = ~ c('2020-21', '2021-22', '2022-23'),
         type = 'bar',
         name = 'A',
         height = 235,
@@ -1519,8 +1627,8 @@ summary_gt <- reactive({
       plotly::plot_ly(
         data = budget_data(),
         x = ~ Others,
-        y = ~ c('Total Budget',
-                'Teacher Salaries'),
+        y = ~ c('Teacher Salaries',
+                'Total Budget'),
         type = 'bar',
         name = 'Others',
         height = 307,
@@ -1735,7 +1843,6 @@ summary_gt <- reactive({
                     is_district = ifelse(is_district == 'district', district(),is_district))
     })
   
-  observe(print(sat_data()))
     
   output$sat_performance <- plotly::renderPlotly({
       plotly::plot_ly(
@@ -3483,6 +3590,20 @@ days_with_df <- reactive({
           dplyr::filter(category %in% c('nurses_unionized', 'no_nurses_union'))%>% 
         dplyr::mutate(dplyr::across(.fns = as.numeric))
     })
+  
+district_union_text <- reactive({
+  req(comp_districts)
+    if(subset(nurse_union_data(), rownames(nurse_union_data()) == 'nurses_unionized')$district == 1 & !is.na(subset(nurse_union_data(), rownames(nurse_union_data()) == 'nurses_unionized')$district)){
+      tags$span('Yes', class = 'answer-text')
+    }else{
+      tags$span('No', class = 'answer-text')
+    }
+  })
+
+
+
+
+district_union_output <- renderUI(district_union_text())
 
     output$nurses_union_plot <- plotly::renderPlotly({
       req(input$comp_cond)
@@ -3498,7 +3619,7 @@ days_with_df <- reactive({
              marker = list(colors = c("#2a3a6e", "gray"),
                       line = list(color = '#FFFFFF', width = 1))
             )%>%
-            plotly::add_pie()%>%
+            plotly::add_pie(hole = 0.5)%>%
           plotly:: config(displayModeBar = FALSE) %>%
             plotly::layout(
                 title = "Nurses Unionized",
@@ -3537,7 +3658,7 @@ days_with_df <- reactive({
              marker = list(colors = c("#2a3a6e", "gray"),
                       line = list(color = '#FFFFFF', width = 1))
             )%>%
-            plotly::add_pie()%>%
+            plotly::add_pie(hole = 0.5)%>%
           plotly:: config(displayModeBar = FALSE) %>%
             plotly::layout(
                 title = "Sick Days Buy Back",
@@ -3561,6 +3682,7 @@ days_with_df <- reactive({
           dplyr::filter(category %in% c('sick_leave_bank', 'no_sick_bank')) %>% 
         dplyr::mutate(dplyr::across(.fns = as.numeric))
     })
+    
 
     output$sick_bank_binary <- plotly::renderPlotly({
       req(input$comp_cond)
@@ -3576,7 +3698,7 @@ days_with_df <- reactive({
              marker = list(colors = c("#2a3a6e", "gray"),
                       line = list(color = '#FFFFFF', width = 1))
             )%>%
-            plotly::add_pie()%>%
+            plotly::add_pie(hole = 0.5)%>%
           plotly:: config(displayModeBar = FALSE) %>%
             plotly::layout(
                 title = "Sick Leave Bank",
