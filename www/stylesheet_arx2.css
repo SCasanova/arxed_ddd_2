@@ -96,7 +96,7 @@ div{
    background-color: #DB9743;
 }
 
-#reset {
+#reset,#submit_pass {
    background-color: #2a3a6e;
 }
 
@@ -114,7 +114,6 @@ div{
   padding:5px;
   top:0;
   width:180px;
-
 }
 
 .side-button{
@@ -234,4 +233,8 @@ div{
 .answer-text{
   position:absolute;
   font-size: 120px;
+}
+
+.select-menu{
+  margin:5%;
 }
