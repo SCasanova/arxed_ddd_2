@@ -970,11 +970,14 @@ ui <- shinymanager::secure_app(ui)
 
   active_user <- reactive(stringr::str_remove_all(auth_output()$user, "[\r\n]"))
   
+  #get distrtict associated with user from DB
   query_district <- reactive({paste0("SELECT district_name
                    FROM districts
                    WHERE user =",
                  "'",active_user(),"';")})
   
+  
+  #limit options to user district(s) or all districts for administrators
    personal_district_options <- reactive({
      if(active_user() %in% c('Mike', 'Brian', 'Santiago')){
        district_options
@@ -983,6 +986,7 @@ ui <- shinymanager::secure_app(ui)
      }
    })
    
+   #render the selector with user districts
    output$district_select <- renderUI({
      shinyMobile::f7Select(
        inputId = 'district',
@@ -1058,11 +1062,6 @@ ui <- shinymanager::secure_app(ui)
         unique() %>% 
         as.character()
   })
-
-   comp_districts <- reactive({
-     req(district())
-     input$district_comps
-     })
      
      district_logo <- reactive({ #access district table to get name and logo associated with district
        req(district())
@@ -1296,8 +1295,8 @@ charter_schools <- reactive({
   }
 })
 
-
-district_comps_step_1 <- reactive({ #Concatenate all selected options
+#Combine (union) all selected modules
+district_comps_step_1 <- reactive({ 
   c(
     county_schools(),league_schools(),my_schools(),dart_schoools(),
     vocational_schools(),charter_schools(),regional_schools()
@@ -1305,6 +1304,9 @@ district_comps_step_1 <- reactive({ #Concatenate all selected options
     unique()
 })
 
+
+#Filters are set to 0 or a virtual inf for each category if the filter option is
+#not active. If it is active its set to the selected amount with units
 budget_hi <- reactive({
   if(length(input$budget[2]) ==0){
     1000000000000000
@@ -1363,6 +1365,7 @@ salary_lo <- reactive({
   }
   })
 
+#Filter all schools by the criteria defined above
 district_comps_step_2 <- reactive({
   school_info %>%
     dplyr::filter(
@@ -1378,22 +1381,25 @@ district_comps_step_2 <- reactive({
   
 })
 
+#intersect filtered schools with previously selected list to get final options
 district_comps_initial <- reactive({
   intersect(district_comps_step_1(),district_comps_step_2())
 })
 
-# observe(print(district_comps_step_1()))
-# observe(print(district_comps_step_2()))
-# observe(print(district_comps_initial()))
-
-
+#Observe for any input change to update the selected list
 observeEvent(list(input$comp_cond, input$comp_filter, input$salary, input$budget, input$fte, input$enrollment), {
   updateSelectizeInput(
      inputId = "district_comps",
      selected = district_comps_initial()
   )
     })
+
+comp_districts <- reactive({
+     req(district())
+     input$district_comps
+     })
   
+#reset button will clear the selected options (along with js defined in the UI)
   observeEvent(input$reset, {
       updateSelectizeInput(
         inputId = "district_comps",
@@ -1402,7 +1408,8 @@ observeEvent(list(input$comp_cond, input$comp_filter, input$salary, input$budget
     })
   
 
-  
+  #save button will first delete all currently saved schools in the DB and then 
+  #insert row by row before notifying the user
   observeEvent(input$save, {
     query <- paste0("DELETE FROM custom_schools
                     WHERE user =",
@@ -1432,6 +1439,10 @@ observeEvent(list(input$comp_cond, input$comp_filter, input$salary, input$budget
   
  # Plot DF for multiple use ------------------------------------------------
 
+  #create a df that includes all selected districts, user district, and a dummy 
+  #row to act as the "other" when no others are selected.
+  # The df is then grouped and summarized to get the average of all the others
+  # and other special info required for plots
 plot_comp_df <- reactive({
         req(district())
         school_info %>%
@@ -1461,6 +1472,7 @@ plot_comp_df <- reactive({
 
 # Home --------------------------------------------------------------------
 
+  #creates a summary table to be rendered as a gt table 
 summary_gt <- reactive({
     district_df <- school_info %>%
             dplyr::filter(district_name == district(),
@@ -1485,7 +1497,7 @@ summary_gt <- reactive({
               ) 
   })
     
-  
+  #rendered with 100% width to fit the container
   output$summary_table <- gt::render_gt(
     expr = summary_gt(),
     width = gt::pct(100)
@@ -1524,6 +1536,8 @@ summary_gt <- reactive({
           tags$span(district(), style = "color:#DB9743"), " vs"  ,tags$span("All Available Districts", style = "color:#2a3a6e"))
     })
     
+    #similar to plot_comp_df but in this case it gets the average for all available
+    # districts, not just the selected ones
     plot_all_data <- reactive({
       req(district())
       school_info %>%
@@ -1542,6 +1556,7 @@ summary_gt <- reactive({
       
     })
     
+    #filter for a specific category and later render a plotly plot (recurring MO)
     cola_all_data <- reactive({
       req(district())
       plot_all_data() %>% 
@@ -1690,9 +1705,10 @@ summary_gt <- reactive({
           font = list(size = 12)
         )
   })
-#here start all the plots that depend on the comparison districts
+
+    #the start all the plots that depend on the comparison districts
     
-    palette_names <- reactive({
+    palette_names <- reactive({ #This palette always sets orange for the district and blue for the others
       req(district())
       setNames(palette, c('Others', district()))
       })
@@ -2030,7 +2046,7 @@ summary_gt <- reactive({
       )
   })
   
-  #Screenshots
+  #Screenshot manager that will capture the special selector in each page and generate a PNG
   observeEvent(input$down_home, { #take "screenshot" of home selector
     shinyscreenshot::screenshot(selector = '#home-plots' , filename = paste(comp_year(), district(), 'Home'), scale = 4)
   })
@@ -2055,6 +2071,7 @@ summary_gt <- reactive({
   observeEvent(input$down_work, { #take "screenshot" of selector
     shinyscreenshot::screenshot(selector = '#work' , filename =  paste(comp_year(), district(),'Working Conditions Page'), scale = 4)
   })
+  
   
   output$down_overview_csv = downloadHandler(
      filename = function() {
@@ -2489,6 +2506,7 @@ summary_gt <- reactive({
 
 # Plots -------------------------------------------------------------------
 
+    #display major stat categories
 output$x_cat_disp <- renderUI({
     req(input$plot_type)
     if(input$plot_type == 'Scatter'){
@@ -2502,6 +2520,8 @@ output$x_cat_disp <- renderUI({
     } 
     })
     
+    
+    #display minor stat options
 output$x_var_disp <- renderUI({
     req(input$plot_type)
     if(input$plot_type == 'Scatter'){
@@ -2533,6 +2553,7 @@ output$y_var_disp <- renderUI({
        )
     })
 
+#depending on the major stat input, update the minor stat options 
 output$x_var_disp <- renderUI({
   req(input$x_cat)
   if(input$plot_type == 'Scatter'){
