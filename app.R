@@ -261,10 +261,67 @@ statistic_names_full <- c( #Vector for sub-level stats
     "% Students High-Need",
     "Low-Income Students",
     "% Students Low-Income",
-    "DART Name",
+    "League",
     "City",
     "County",
-    "League"
+    "Curn Intake/Enrollment",
+    '% Churn',
+    "% Intake",
+    "Stability Enrollment",
+    "% Stability",
+    "Total # Of Classes",
+    "Average Class Size",
+    "# Of Students",
+    "% African American Students",
+    "% Asian Students",
+    "% Hispanic Students",
+    "% White Students",
+    "% Native American Students",
+    "% Hawaiian/Pacific Islander Students",
+    "% Multi-Race Non-Hispanic Students",
+    "% African American Staff",
+    "% Asian Staff",
+    "% Hispanic Staff",
+    "% White Staff",
+    "% Native American Staff",
+    "% Hawaiian/Pacific Islander Staff",
+    "% Multi-Race Non-Hispanic Staff",
+    "% Female Staff",
+    "% Male Staff",
+    "Total FTE",
+    "# First Language Not English",
+    "% First Language Not English",
+    "# English language Learners",
+    "% English language Learners",
+    "# Students With Disabilities",
+    "% Students With Disabilities",
+    "# Low Income",
+    "% Low Income",
+    "# Students With Free Lunch",
+    "% Students With Free Lunch",
+    "# Students With Reduced Lunch",
+    "% Students With Reduced Lunch",
+    "# of High Needs Students",
+    "% of High Needs Students",
+    "# Economically Disadvantaged Students",
+    "% Economically Disadvantaged Students",
+    "In-district FTE pupils",
+    "Out Of District FTE pupils",
+    'Total FTE Pupils',
+    "Administration Spending",
+    "Instructional Leadership Spending",
+    "Teachers Spending",
+    "Teaching Services Spending",
+    "Proffesional Developement Spending",
+    "Materials/Equipment Spending",
+    "Guidance and Counceling Spending",
+    "Pupil Services Spending",
+    "Operations and Maintenance Spending",
+    "Insurance and Retirement Programs Spending",
+    "Total In-district Spending",
+    "Instructional Services Spending",
+    "Total Expenditures Spending",
+    "DART Name"
 )
  
  color_palette <- c("darkred", "white", "darkgreen")
@@ -309,134 +366,9 @@ statistic_names_full <- c( #Vector for sub-level stats
         ) 
 }
  
-school_info <- readr::read_csv("school_info.csv") %>%
-    dplyr::mutate(
-        dart_name = dplyr::case_when(
-            district_name == "Seven Hills Charter Public (District)" ~ "Learning First Charter Public School (District)",
-            district_name == "Massachusetts Virtual Academy at Greenfield Commonwealth Virtual District" ~ "Greater Commonwealth Virtual District",
-            district_name == "Hampden Charter School of Science (District)" ~ "Hampden Charter School of Science East (District)",
-            district_name == "Tri County Regional Vocational Technical" ~ "Tri-County Regional Vocational Technical",
-            district_name == "Brooke Charter School East Boston (District)" ~ "Brooke Charter School (District)",
-            district_name == "Greater Commonwealth Virtual District" ~ "Greenfield Commonwealth Virtual District",
-            district_name == "Southern Worcester County Regional Vocational School District" ~ "Southern Worcester County Regional Vocational Technical",
-            district_name == "Boylston" ~ "Berlin-Boylston",
-            district_name == "Berlin" ~ "Berlin-Boylston",
-            TRUE ~ district_name),
-        district_name = dplyr::case_when(
-            district_name == "Seven Hills Charter Public (District)" ~ "Learning First Charter Public School (District)",
-            district_name == "Massachusetts Virtual Academy at Greenfield Commonwealth Virtual District" ~ "Greater Commonwealth Virtual District",
-            district_name == "Tri County Regional Vocational Technical" ~ "Tri-County Regional Vocational Technical",
-            district_name == "Greater Commonwealth Virtual District" ~ "Greenfield Commonwealth Virtual District",
-            district_name == "Southern Worcester County Regional Vocational School District" ~ "Southern Worcester County Regional Vocational Technical",
-            TRUE ~ district_name))
+school_info <- readr::read_csv("school_info.csv") 
 
 axis_options <- purrr::set_names(colnames(school_info), statistic_names_full)
- 
-student_needs <- read.csv('student_needs.csv') %>% 
-    dplyr::mutate(
-        dart_name = dplyr::case_when(
-            district_name == "Seven Hills Charter Public (District)" ~ "Learning First Charter Public School (District)",
-            district_name == "Massachusetts Virtual Academy at Greenfield Commonwealth Virtual District" ~ "Greater Commonwealth Virtual District",
-            district_name == "Hampden Charter School of Science (District)" ~ "Hampden Charter School of Science East (District)",
-            district_name == "Tri County Regional Vocational Technical" ~ "Tri-County Regional Vocational Technical",
-            district_name == "Brooke Charter School East Boston (District)" ~ "Brooke Charter School (District)",
-            district_name == "Greater Commonwealth Virtual District" ~ "Greenfield Commonwealth Virtual District",
-            district_name == "Southern Worcester County Regional Vocational School District" ~ "Southern Worcester County Regional Vocational Technical",
-            district_name == "Boylston" ~ "Berlin-Boylston",
-            district_name == "Berlin" ~ "Berlin-Boylston",
-            TRUE ~ district_name),
-        district_name = dplyr::case_when(
-            district_name == "Seven Hills Charter Public (District)" ~ "Learning First Charter Public School (District)",
-            district_name == "Massachusetts Virtual Academy at Greenfield Commonwealth Virtual District" ~ "Greater Commonwealth Virtual District",
-            district_name == "Tri County Regional Vocational Technical" ~ "Tri-County Regional Vocational Technical",
-            district_name == "Greater Commonwealth Virtual District" ~ "Greenfield Commonwealth Virtual District",
-            district_name == "Southern Worcester County Regional Vocational School District" ~ "Southern Worcester County Regional Vocational Technical",
-            TRUE ~ district_name))
-
-student_diversity <- read.csv('student_diversity.csv') %>% 
-    dplyr::mutate(
-        dart_name = dplyr::case_when(
-            district_name == "Seven Hills Charter Public (District)" ~ "Learning First Charter Public School (District)",
-            district_name == "Massachusetts Virtual Academy at Greenfield Commonwealth Virtual District" ~ "Greater Commonwealth Virtual District",
-            district_name == "Hampden Charter School of Science (District)" ~ "Hampden Charter School of Science East (District)",
-            district_name == "Tri County Regional Vocational Technical" ~ "Tri-County Regional Vocational Technical",
-            district_name == "Brooke Charter School East Boston (District)" ~ "Brooke Charter School (District)",
-            district_name == "Greater Commonwealth Virtual District" ~ "Greenfield Commonwealth Virtual District",
-            district_name == "Southern Worcester County Regional Vocational School District" ~ "Southern Worcester County Regional Vocational Technical",
-            district_name == "Boylston" ~ "Berlin-Boylston",
-            district_name == "Berlin" ~ "Berlin-Boylston",
-            TRUE ~ district_name),
-        district_name = dplyr::case_when(
-            district_name == "Seven Hills Charter Public (District)" ~ "Learning First Charter Public School (District)",
-            district_name == "Massachusetts Virtual Academy at Greenfield Commonwealth Virtual District" ~ "Greater Commonwealth Virtual District",
-            district_name == "Tri County Regional Vocational Technical" ~ "Tri-County Regional Vocational Technical",
-            district_name == "Greater Commonwealth Virtual District" ~ "Greenfield Commonwealth Virtual District",
-            district_name == "Southern Worcester County Regional Vocational School District" ~ "Southern Worcester County Regional Vocational Technical",
-            TRUE ~ district_name))
-
-student_mobility <- read.csv('student_mobility.csv') %>% 
-    dplyr::mutate(
-        dart_name = dplyr::case_when(
-            district_name == "Seven Hills Charter Public (District)" ~ "Learning First Charter Public School (District)",
-            district_name == "Massachusetts Virtual Academy at Greenfield Commonwealth Virtual District" ~ "Greater Commonwealth Virtual District",
-            district_name == "Hampden Charter School of Science (District)" ~ "Hampden Charter School of Science East (District)",
-            district_name == "Tri County Regional Vocational Technical" ~ "Tri-County Regional Vocational Technical",
-            district_name == "Brooke Charter School East Boston (District)" ~ "Brooke Charter School (District)",
-            district_name == "Greater Commonwealth Virtual District" ~ "Greenfield Commonwealth Virtual District",
-            district_name == "Southern Worcester County Regional Vocational School District" ~ "Southern Worcester County Regional Vocational Technical",
-            district_name == "Boylston" ~ "Berlin-Boylston",
-            district_name == "Berlin" ~ "Berlin-Boylston",
-            TRUE ~ district_name),
-        district_name = dplyr::case_when(
-            district_name == "Seven Hills Charter Public (District)" ~ "Learning First Charter Public School (District)",
-            district_name == "Massachusetts Virtual Academy at Greenfield Commonwealth Virtual District" ~ "Greater Commonwealth Virtual District",
-            district_name == "Tri County Regional Vocational Technical" ~ "Tri-County Regional Vocational Technical",
-            district_name == "Greater Commonwealth Virtual District" ~ "Greenfield Commonwealth Virtual District",
-            district_name == "Southern Worcester County Regional Vocational School District" ~ "Southern Worcester County Regional Vocational Technical",
-            TRUE ~ district_name))
-
-staff_diversity <- read.csv('staff_diversity.csv') %>% 
-    dplyr::mutate(
-        dart_name = dplyr::case_when(
-            district_school_name == "Seven Hills Charter Public (District)" ~ "Learning First Charter Public School (District)",
-            district_school_name == "Massachusetts Virtual Academy at Greenfield Commonwealth Virtual District" ~ "Greater Commonwealth Virtual District",
-            district_school_name == "Hampden Charter School of Science (District)" ~ "Hampden Charter School of Science East (District)",
-            district_school_name == "Tri County Regional Vocational Technical" ~ "Tri-County Regional Vocational Technical",
-            district_school_name == "Brooke Charter School East Boston (District)" ~ "Brooke Charter School (District)",
-            district_school_name == "Greater Commonwealth Virtual District" ~ "Greenfield Commonwealth Virtual District",
-            district_school_name == "Southern Worcester County Regional Vocational School District" ~ "Southern Worcester County Regional Vocational Technical",
-            district_school_name == "Boylston" ~ "Berlin-Boylston",
-            district_school_name == "Berlin" ~ "Berlin-Boylston",
-            TRUE ~ district_school_name),
-        district_name = dplyr::case_when(
-            district_school_name == "Seven Hills Charter Public (District)" ~ "Learning First Charter Public School (District)",
-            district_school_name == "Massachusetts Virtual Academy at Greenfield Commonwealth Virtual District" ~ "Greater Commonwealth Virtual District",
-            district_school_name == "Tri County Regional Vocational Technical" ~ "Tri-County Regional Vocational Technical",
-            district_school_name == "Greater Commonwealth Virtual District" ~ "Greenfield Commonwealth Virtual District",
-            district_school_name == "Southern Worcester County Regional Vocational School District" ~ "Southern Worcester County Regional Vocational Technical",
-            TRUE ~ district_school_name))
-
-expenditures <- readr::read_csv("expenditures.csv") %>%
-  janitor::clean_names() %>% 
-    dplyr::mutate(
-        dart_name = dplyr::case_when(
-            district == "Seven Hills Charter Public (District)" ~ "Learning First Charter Public School (District)",
-            district == "Massachusetts Virtual Academy at Greenfield Commonwealth Virtual District" ~ "Greater Commonwealth Virtual District",
-            district == "Hampden Charter School of Science (District)" ~ "Hampden Charter School of Science East (District)",
-            district == "Tri County Regional Vocational Technical" ~ "Tri-County Regional Vocational Technical",
-            district == "Brooke Charter School East Boston (District)" ~ "Brooke Charter School (District)",
-            district == "Greater Commonwealth Virtual District" ~ "Greenfield Commonwealth Virtual District",
-            district == "Southern Worcester County Regional Vocational School District" ~ "Southern Worcester County Regional Vocational Technical",
-            district == "Boylston" ~ "Berlin-Boylston",
-            district == "Berlin" ~ "Berlin-Boylston",
-            TRUE ~ district),
-        district = dplyr::case_when(
-            district == "Seven Hills Charter Public (District)" ~ "Learning First Charter Public School (District)",
-            district == "Massachusetts Virtual Academy at Greenfield Commonwealth Virtual District" ~ "Greater Commonwealth Virtual District",
-            district == "Tri County Regional Vocational Technical" ~ "Tri-County Regional Vocational Technical",
-            district == "Greater Commonwealth Virtual District" ~ "Greenfield Commonwealth Virtual District",
-            district == "Southern Worcester County Regional Vocational School District" ~ "Southern Worcester County Regional Vocational Technical",
-            TRUE ~ district))
         
 dart <- readr::read_csv("all_dart.csv") %>%
     dplyr::select(-c(
@@ -581,7 +513,7 @@ ui <- shinyMobile::f7Page(
                tags$div(
                  shinyMobile::f7Button(
                    inputId = 'down_home',
-                   label = tags$span(tags$i(class = 'fas fa-camera'), tags$span('Donwload as Image')) #fas fa classes corresponf to fontawesome
+                   label = tags$span(tags$i(class = 'fas fa-camera'), tags$span('Download as Image')) #fas fa classes corresponf to fontawesome
                  ),
            class = "other-button card-button2"),
                tags$div(style = 'display:flex;',
@@ -704,7 +636,7 @@ ui <- shinyMobile::f7Page(
                 tags$div(
                    shinyMobile::f7Button(
                      inputId = 'down_students',
-                     label = tags$span(tags$i(class = 'fas fa-camera'), tags$span('Donwload as Image')) #fas fa classes corresponf to fontawesome
+                     label = tags$span(tags$i(class = 'fas fa-camera'), tags$span('Download as Image')) #fas fa classes corresponf to fontawesome
                    ),
                    class = "other-button card-button2"
                  ),
@@ -750,7 +682,7 @@ ui <- shinyMobile::f7Page(
                tags$div(
                    shinyMobile::f7Button(
                      inputId = 'down_staff',
-                     label = tags$span(tags$i(class = 'fas fa-camera'), tags$span('Donwload as Image')) #fas fa classes corresponf to fontawesome
+                     label = tags$span(tags$i(class = 'fas fa-camera'), tags$span('Download as Image')) #fas fa classes corresponf to fontawesome
                    ),
                    class = "other-button card-button2"
                  ),
@@ -802,7 +734,7 @@ ui <- shinyMobile::f7Page(
                tags$div(
                    shinyMobile::f7Button(
                      inputId = 'down_finances',
-                     label = tags$span(tags$i(class = 'fas fa-camera'), tags$span('Donwload as Image')) #fas fa classes corresponf to fontawesome
+                     label = tags$span(tags$i(class = 'fas fa-camera'), tags$span('Download as Image')) #fas fa classes corresponf to fontawesome
                    ),
                    class = "other-button card-button2"
                  ),
@@ -826,10 +758,47 @@ ui <- shinyMobile::f7Page(
                tags$div(
                    shinyMobile::f7Button(
                      inputId = 'down_academic',
-                     label = tags$span(tags$i(class = 'fas fa-camera'), tags$span('Donwload as Image')) #fas fa classes corresponf to fontawesome
+                     label = tags$span(tags$i(class = 'fas fa-camera'), tags$span('Download as Image')) #fas fa classes corresponf to fontawesome
                    ),
                    class = "other-button card-button2"
+                 ),
+               tags$div(id = 'academic', shinyMobile::f7Shadow(
+                 hover = T,
+                 intensity = 16,
+                 shinyMobile::f7Card(
+                   tags$div(style = "display:flex;",
+                        tags$div(class = 'inputs',
+                          plotly::plotlyOutput('ap_3_5')),
+                        tags$div(class = 'inputs',
+                          plotly::plotlyOutput('ap_taken'))
+                        )
                  )
+               ),
+               shinyMobile::f7Shadow(
+                 hover = T,
+                 intensity = 16,
+                 shinyMobile::f7Card(
+                   tags$div(style = "display:flex;",
+                        tags$div(class = 'inputs',
+                          plotly::plotlyOutput('sat_results')),
+                        tags$div(class = 'inputs',
+                          plotly::plotlyOutput('sat_taken'))
+                        )
+                 )
+               ),
+               shinyMobile::f7Shadow(
+                 hover = T,
+                 intensity = 16,
+                 shinyMobile::f7Card(
+                   tags$div(style = "display:flex;",
+                        tags$div(class = 'inputs',
+                          plotly::plotlyOutput('mcas_ap')),
+                        tags$div(class = 'inputs',
+                          plotly::plotlyOutput('mcas_wf'))
+                        )
+                 )
+               )
+               )
           ),
           shinyMobile::f7Tab(
                tabName = "Work Cond.",
@@ -838,7 +807,7 @@ ui <- shinyMobile::f7Page(
                tags$div(
                    shinyMobile::f7Button(
                      inputId = 'down_work',
-                     label = tags$span(tags$i(class = 'fas fa-camera'), tags$span('Donwload as Image')) #fas fa classes corresponf to fontawesome
+                     label = tags$span(tags$i(class = 'fas fa-camera'), tags$span('Download as Image')) #fas fa classes corresponf to fontawesome
                    ),
                    class = "other-button card-button2"
                  ),
@@ -904,7 +873,7 @@ ui <- shinyMobile::f7Page(
             tags$div(
               shinyMobile::f7Button(
                 inputId = 'down_plot',
-                label = tags$span(tags$i(class = 'fas fa-camera'), tags$span('Donwload as Image')) #fas fa classes corresponf to fontawesome
+                label = tags$span(tags$i(class = 'fas fa-camera'), tags$span('Download as Image')) #fas fa classes corresponf to fontawesome
               ),
               class = "other-button card-button2"
             ),
@@ -1244,9 +1213,7 @@ my_schools <- reactive({
     query <- paste0("SELECT school
                             FROM custom_schools
                             WHERE user =",
-                    "'",
-                    active_user(),
-                    "';")
+                    "'",active_user(),"';")
     
     sqlQuery(query) %>%
       dplyr::pull(school) %>%
@@ -1297,8 +1264,7 @@ charter_schools <- reactive({
 
 #Combine (union) all selected modules
 district_comps_step_1 <- reactive({ 
-  c(
-    county_schools(),league_schools(),my_schools(),dart_schoools(),
+  c(county_schools(),league_schools(),my_schools(),dart_schoools(),
     vocational_schools(),charter_schools(),regional_schools()
   ) %>%
     unique()
@@ -1309,7 +1275,7 @@ district_comps_step_1 <- reactive({
 #not active. If it is active its set to the selected amount with units
 budget_hi <- reactive({
   if(length(input$budget[2]) ==0){
-    1000000000000000
+    10000000000000000
   } else{
     input$budget[2] * 1000000
   }
@@ -1324,7 +1290,7 @@ budget_lo <- reactive({
 
 enrollment_hi <- reactive({
   if(length(input$enrollment[2]) == 0){
-    10000000
+    100000000
   } else{
     input$enrollment[2] * 100
   }
@@ -1338,7 +1304,7 @@ enrollment_lo <- reactive({
   })
 fte_hi <- reactive({
   if(length(input$fte[2]) == 0){
-    1000000
+    10000000
   } else{
     input$fte[2]
   }
@@ -1352,7 +1318,7 @@ fte_lo <- reactive({
   })
 salary_hi <- reactive({
   if(length(input$salary[2]) == 0){
-    100000000
+    1000000000
   } else {
     input$salary[2] * 1000
   }
@@ -1400,7 +1366,7 @@ comp_districts <- reactive({
      })
   
 #reset button will clear the selected options (along with js defined in the UI)
-  observeEvent(input$reset, {
+  observeEvent(list(input$reset, input$collaborative), {
       updateSelectizeInput(
         inputId = "district_comps",
         selected = ""
@@ -1451,7 +1417,7 @@ plot_comp_df <- reactive({
             dplyr::mutate(is_district = ifelse(district_name == district(), district(), "Others")) %>%
             dplyr::group_by(is_district) %>%
             dplyr::summarize(
-              dplyr::across(grade_pk:low_income_pct,
+              dplyr::across(grade_pk:total_expenditures,
                              ~ mean(.x, na.rm = TRUE)
                             ),
               year = dplyr::last(year)
@@ -1474,6 +1440,7 @@ plot_comp_df <- reactive({
 
   #creates a summary table to be rendered as a gt table 
 summary_gt <- reactive({
+  req(district())
     district_df <- school_info %>%
             dplyr::filter(district_name == district(),
                    year == comp_year()) %>%
@@ -1560,7 +1527,7 @@ summary_gt <- reactive({
     cola_all_data <- reactive({
       req(district())
       plot_all_data() %>% 
-        dplyr::filter(category %in% c('cola_2020_21', 'cola_2021_22', 'cola_2022_23')) %>% 
+        dplyr::filter(category %in% c('cola_2022_23', 'cola_2021_22', 'cola_2020_21')) %>% 
         dplyr::mutate(dplyr::across(.fns = as.numeric))
       
     })
@@ -1570,7 +1537,7 @@ summary_gt <- reactive({
       plotly::plot_ly(
         cola_all_data(),
         x = ~Others,
-        y = ~ c('2022-23', '2021-22', '2020-21'),
+        y = c('2020-21', '2021-22', '2022-23'),
         type = 'bar',
         name = 'A',
         height = 235,
@@ -1978,10 +1945,11 @@ summary_gt <- reactive({
     })
   
 
+
   output$mcas <-  plotly::renderPlotly(
         plotly::plot_ly(
         mcas_data(),
-        x = ~c('ELA', 'Math', 'Science'),
+        x = ~c('Science', 'ELA', 'Math'),
         y = ~ district,
         type = 'bar',
         name = district(),
@@ -1999,7 +1967,7 @@ summary_gt <- reactive({
                   marker = list(color = '#2a3a6e')) %>%
         plotly::layout(
           xaxis = list(title = "", fixedrange = T, categoryorder = "array", categoryarray = c('PK', 'K', purrr::map_chr(seq(12), function(x){paste('Grade', x)}))),
-          yaxis = list(title = "% Advanced/Proeficient", fixedrange = T,automargin = T, range = c(0, max(mcas_data(), na.rm = T)*1.15)),
+          yaxis = list(title = "% Advanced/Proficient", fixedrange = T,automargin = T, range = c(0, max(mcas_data(), na.rm = T)*1.15)),
           barmode = 'group',
           title = '10th Grade MCAS',
           showlegend =F,
@@ -2790,33 +2758,9 @@ output$userplot <- plotly::renderPlotly({
 
     needs_data <- reactive({
       req(district())
-      student_needs %>%
-        dplyr::filter(district_name %in% c(comp_districts(), district()) &
-                        year == comp_year()) %>%
-        dplyr::mutate(is_district = ifelse(district_name == district(), 'district', 'Others')) %>% 
-        dplyr::select(
-          is_district,
-          economically_disadvantaged_percent,
-          english_language_learner_percent,
-          students_with_disabilities_percent
-        ) %>%
-          dplyr::group_by(is_district) %>% 
-        dplyr::summarise(dplyr::across(
-          (
-            economically_disadvantaged_percent:students_with_disabilities_percent
-          ),
-          ~ mean(.x, na.rm = TRUE)
-        )) %>% 
-        t() %>% 
-        janitor::row_to_names(1) %>% 
-        data.frame() %>% 
-        dplyr::mutate(dplyr::across(.fns = as.numeric),
-                      Others = if(exists('Others')){
-                         Others
-                       }else{
-                         rep(NA, nrow(.))
-                       })
-      
+      plot_comp_df() %>% 
+        dplyr::filter(category %in% c('economically_disadvantaged_percent', 'english_language_learner_percent', 'students_with_disabilities_percent')) %>% 
+        dplyr::mutate(dplyr::across(.fns = as.numeric))
     })
     
 
@@ -2849,25 +2793,9 @@ output$userplot <- plotly::renderPlotly({
     
     diversity_data <- reactive({
       req(district())
-      student_diversity %>%
-        dplyr::filter(district_name %in% c(comp_districts(), district(), 'dummy'),
-                      year == comp_year()) %>%
-        dplyr::mutate(is_district = ifelse(district_name == district(), 'district', 'Others')) %>% 
-        dplyr::select(is_district, african_american_percent:multi_race_non_hispanic_percent) %>%
-        dplyr::group_by(is_district) %>% 
-        dplyr::summarise(dplyr::across(
-          (african_american_percent:multi_race_non_hispanic_percent),
-          ~ mean(.x, na.rm = TRUE)
-        )) %>% 
-        t() %>%
-        janitor::row_to_names(1) %>%
-        data.frame() %>%
-        dplyr::mutate(dplyr::across(.fns = as.numeric),
-                      Others = if(exists('Others')){
-                         Others
-                       }else{
-                         rep(NA, nrow(.))
-                       })
+      plot_comp_df() %>% 
+        dplyr::filter(category %in% c('african_american_percent_students', 'asian_percent_students', 'hispanic_percent_students', 'white_percent_students', 'native_american_percent_students', 'native_hawaiian_pacific_islander_percent_students', 'multi_race_non_hispanic_percent_students')) %>% 
+        dplyr::mutate(dplyr::across(.fns = as.numeric))
       
     })
     
@@ -2945,27 +2873,9 @@ output$userplot <- plotly::renderPlotly({
     
     mobility_data <- reactive({
       req(district())
-        student_mobility %>%
-        dplyr::filter(district_name %in% c(comp_districts(), district(), 'dummy'),
-                      year == comp_year()) %>%
-        dplyr::mutate(is_district = ifelse(district_name == district(), 'district', 'Others')) %>%
-        dplyr::select(is_district, percent_churn, percent_intake, percent_stability) %>%
-        dplyr::group_by(is_district) %>%
-        dplyr::summarise(dplyr::across(
-          (percent_churn:percent_stability),
-          ~ mean(.x, na.rm = TRUE)
-        )) %>%
-        t() %>%
-        janitor::row_to_names(1) %>%
-        data.frame() %>%
-        dplyr::mutate(dplyr::across(.fns = as.numeric),
-                       Others = if(exists('Others')){
-                         Others
-                       }else{
-                         rep(NA, nrow(.))
-                       }
-                      )
-
+      plot_comp_df() %>% 
+        dplyr::filter(category %in% c('percent_churn', 'percent_intake', 'percent_stability')) %>% 
+        dplyr::mutate(dplyr::across(.fns = as.numeric))
     })
     
 
@@ -3081,24 +2991,10 @@ output$userplot <- plotly::renderPlotly({
 
     staff_gender_data <- reactive({
       req(district())
-      staff_diversity %>%
-        dplyr::filter(district_name %in% c(comp_districts(), district()),
-                      year == comp_year()) %>%
-        dplyr::select(aaa = district_name, males_percent, females_percent) %>%
-        dplyr::mutate(aaa = ifelse(aaa == district(), 'district', 'Others')) %>%
-        dplyr::group_by(aaa) %>%
-        dplyr::summarise(dplyr::across(males_percent:females_percent,
-                                       ~ mean(.x, na.rm = TRUE))) %>%
-        t() %>%
-        data.frame() %>%
-        janitor::row_to_names(1) %>%
-        dplyr::mutate(Others = if(exists('Others')){
-                         Others
-                       }else{
-                         rep(NA, nrow(.))
-                       })
+      plot_comp_df() %>% 
+        dplyr::filter(category %in% c('males_percent', 'females_percent')) %>% 
+        dplyr::mutate(dplyr::across(.fns = as.numeric))
     })
-  observe(print(staff_gender_data()))
 
 
     output$district_gender <- plotly::renderPlotly(
@@ -3164,38 +3060,11 @@ output$userplot <- plotly::renderPlotly({
             )
     )
 
-    staff_diversity_comp <- reactive({
-        staff_diversity %>%
-            dplyr::filter(district_name %in% comp_districts(),
-                          year == comp_year()) %>%
-            dplyr::select(african_american_percent:multi_race_non_hispanic_percent) %>%
-            as.data.frame() %>%
-            dplyr::summarise(
-                dplyr::across(
-                    (african_american_percent:multi_race_non_hispanic_percent),
-                    ~ mean(.x, na.rm = TRUE)
-                )
-            )
-
-    })
-    
-    
-    staff_diversity_district <- reactive({
-      req(district())
-        staff_diversity %>%
-            dplyr::filter(district_name == district(),
-                          year == comp_year()) %>%
-            dplyr::select(african_american_percent:multi_race_non_hispanic_percent) %>%
-            as.data.frame()
-    })
-
     staff_diversity_data <- reactive({
-        req(staff_diversity_district())
-        dplyr::bind_rows(staff_diversity_comp(), staff_diversity_district()) %>%
-            t() %>%
-            data.frame() %>%
-            dplyr::rename(other = X1,
-                   district = X2)
+      req(district())
+      plot_comp_df() %>% 
+        dplyr::filter(category %in% c('african_american_percent_staff', 'asian_percent_staff', 'hispanic_percent_staff', 'white_percent_staff', 'native_american_percent_staff', 'native_hawaiian_pacific_islander_percent_staff', 'multi_race_non_hispanic_percent_staff')) %>% 
+        dplyr::mutate(dplyr::across(.fns = as.numeric))
     })
     
 
@@ -3224,7 +3093,7 @@ output$userplot <- plotly::renderPlotly({
             sizex = 0.2, sizey = 0.2
         )
         )%>%
-        plotly::add_trace(y = ~ other,
+        plotly::add_trace(y = ~ Others,
                   name = 'Other',
                    hovertemplate = 'Other: %{y:,.1f}%<extra></extra>',
                    texttemplate = '%{y:,.1f}%',
@@ -3233,8 +3102,8 @@ output$userplot <- plotly::renderPlotly({
 
     staff_pie_data <- reactive({
       req(district())
-      staff_diversity_district() %>% t() %>% data.frame() %>%
-                            janitor::clean_names()})
+      staff_diversity_data() %>% 
+        dplyr::select(district)})
 
 
     output$staff_diversity_pie <- plotly::renderPlotly(
@@ -3244,9 +3113,9 @@ output$userplot <- plotly::renderPlotly({
             textposition = 'inside',
             textinfo = 'label+percent',
             insidetextfont = list(color = '#FFFFFF'),
-            values = ~x,
+            values = ~district,
             hoverinfo = 'label+percent',
-            text = ~paste0(x, '%'),
+            text = ~paste0(district, '%'),
              marker = list(colors = c('#DB9743', '#3F7CAC', '#2E282A', '#2a3a6e', '#F3EFF5', '#C03221', '#7DAA92'),
                       line = list(color = '#FFFFFF', width = 1))
             )%>%
@@ -3313,14 +3182,13 @@ output$userplot <- plotly::renderPlotly({
     
     finance_data <- reactive({
         req(district())
-         expenditures %>%
-            dplyr::filter(district == district(),
-                          year == comp_year()) %>%
-            dplyr::select(instructional_services, administration, pupil_services, operations_and_maintenance, insurance_retirement_programs_and_other) %>%
-            t() %>%
-            as.data.frame() %>%
-            dplyr::mutate(V1 = round(as.numeric(V1), 1))
+      plot_comp_df() %>% 
+        dplyr::filter(category %in% c('instructional_services', 'administration', 'pupil_services', 'operations_and_maintenance', 'insurance_retirement_programs_and_other')) %>% 
+        # dplyr::mutate(dplyr::across(.fns = as.numeric)) %>% 
+        dplyr::select(district)
     })
+    
+    observe(print(finance_data()))
 
 
     output$finances_plot <- plotly::renderPlotly(
@@ -3330,9 +3198,9 @@ output$userplot <- plotly::renderPlotly({
             textposition = 'inside',
             textinfo = 'label+text',
             insidetextfont = list(color = '#FFFFFF'),
-            values = ~V1,
+            values = ~district,
             hoverinfo = 'label+text+percent',
-            text = ~ paste0("$", formatC(as.numeric(V1), format="f", digits=2, big.mark=",")),
+            text = ~ paste0("$", formatC(as.numeric(district), format="f", digits=2, big.mark=",")),
              marker = list(colors =  c('#DB9743', '#3F7CAC', '#2a3a6e', '#2E282A', '#575a5e'),
                       line = list(color = '#FFFFFF', width = 1))
             )%>%
@@ -3354,77 +3222,23 @@ output$userplot <- plotly::renderPlotly({
             )
     )
     
-    plot_cola_df <- reactive({
-        
-        school_info %>%
-            dplyr::filter(district_name %in% comp_districts() | district_name == district()) %>% 
-            dplyr::mutate(is_district = ifelse(district_name == district(), district(), "Others")) %>%
-            dplyr::group_by(is_district) %>%
-            dplyr::summarize(
-                cola_2015_16 = mean(cola_2015_16, na.rm = T),
-                cola_2016_17 = mean(cola_2016_17, na.rm = T),
-                cola_2017_18 = mean(cola_2017_18, na.rm = T),
-                cola_2018_19 = mean(cola_2018_19, na.rm = T),
-                cola_2019_20 = mean(cola_2019_20, na.rm = T),
-                cola_2020_21 = mean(cola_2020_21, na.rm = T),
-                cola_2021_22 = mean(cola_2021_22, na.rm = T),
-                cola_2022_23 = mean(cola_2022_23, na.rm = T),
-                cola_2023_24 = mean(cola_2023_24, na.rm = T)
-            )
-        
-    })
-    
-    
-     cola_plot_comp <- reactive({
-       req(comp_districts())
-        school_info %>%
-            dplyr::filter(district_name %in% comp_districts(),
-                          year == comp_year()) %>%
-            dplyr::select(cola_2020_21:cola_2022_23) %>%
-            as.data.frame() %>%
-            dplyr::summarise(
-                dplyr::across(
-                    (cola_2020_21:cola_2022_23),
-                    ~ mean(.x, na.rm = TRUE)
-                )
-            )
-
-    })
-    
-    
-    cola_plot_district <- reactive({
-      req(district())
-        school_info %>%
-            dplyr::filter(district_name == district(),
-                          year == comp_year()) %>%
-            dplyr::select(cola_2020_21:cola_2022_23) %>%
-            as.data.frame()
-    })
-
-    cola_plot_data <- reactive({
-        req(cola_plot_district())
-        dplyr::bind_rows(cola_plot_comp(), cola_plot_district()) %>%
-            t() %>%
-            data.frame() %>%
-            dplyr::rename(other = X1,
-                   district = X2) %>% 
-          dplyr::mutate(district = district*100,
-                        other = other*100) %>% 
-          dplyr::arrange(desc(rownames(.)))
-    })
-    
-
+  cola_plot_data <- reactive({
+    plot_comp_df() %>% 
+        dplyr::filter(category %in% c('cola_2020_21', 'cola_2021_22', 'cola_2022_23')) %>% 
+        dplyr::mutate(dplyr::across(.fns = as.numeric))
+  })
+  
     output$cola_plot_comp <- plotly::renderPlotly({
       plotly::plot_ly(
         cola_plot_data(),
-        x = ~other,
-        y = ~ c('2022-23', '2021-22', '2020-21'),
+        x = ~Others,
+        y = ~ c('2020-21', '2021-22', '2022-23'),
         type = 'bar',
         name = 'A',
         orientation = 'h',
         marker = list(color = '#2a3a6e'),
-        hovertemplate = '%{x:,.2f}%<extra></extra>',
-        texttemplate = '%{x:.1f}%',
+        hovertemplate = '%{x:.2%}<extra></extra>',
+        texttemplate = '%{x:.1%}',
         textposition = 'inside'
       ) %>%
          plotly:: config(displayModeBar = FALSE) %>% 
@@ -3432,7 +3246,7 @@ output$userplot <- plotly::renderPlotly({
                   name = 'Other',
                   marker = list(color = '#DB9743')) %>%
         plotly::layout(
-          xaxis = list(title = "COLA %", fixedrange = T),
+          xaxis = list(title = "COLA %", fixedrange = T, ticks = ''),
           yaxis = list(title = "", fixedrange = T),
           margin = list(b = 100),
           barmode = 'group',
@@ -3440,6 +3254,213 @@ output$userplot <- plotly::renderPlotly({
           font = list(size = 18)
         )
   })
+    
+
+# Academic ----------------------------------------------------------------
+
+ap_3_5_data <- reactive({
+        plot_comp_df() %>%
+        dplyr::filter(category %in% c('ap_score_3_5_pct')) %>%
+        dplyr::mutate(dplyr::across(.fns = as.numeric))
+    })
+
+
+    output$ap_3_5 <-  plotly::renderPlotly(
+        plotly::plot_ly(
+        ap_3_5_data(),
+        x = ~ c('% of 3-5 AP Results'),
+        y = ~ district,
+        type = 'bar',
+        name = district(),
+        marker = list(color = '#DB9743'),
+        hovertemplate = paste0(district()  , ': %{y:,.1f}%<extra></extra>'),
+        texttemplate = '%{y:,.1f}%',
+        textposition = 'auto'
+      ) %>%
+        plotly::add_trace(y = ~ Others,
+                  name = 'Other',
+                   hovertemplate = 'Other: %{y:,.2f}%<extra></extra>',
+                   texttemplate = '%{y:,.1f}%',
+                  marker = list(color = '#2a3a6e')) %>%
+        plotly:: config(displayModeBar = FALSE) %>%
+        plotly::layout(
+          xaxis = list(title = "", fixedrange = T, categoryorder = "array", categoryarray = c('PK', 'K', purrr::map_chr(seq(12), function(x){paste('Grade', x)}))),
+          yaxis = list(title = "", fixedrange = T,automargin = T),
+          barmode = 'group',
+          showlegend =F,
+          font = list(size = 18)
+        )
+    )
+    
+ap_taken_data <- reactive({
+        plot_comp_df() %>%
+        dplyr::filter(category %in% c('ap_tests_taken')) %>%
+        dplyr::mutate(dplyr::across(.fns = as.numeric))
+    })
+
+
+    output$ap_taken <-  plotly::renderPlotly(
+        plotly::plot_ly(
+        ap_taken_data(),
+        x = ~ c('AP Tests Taken'),
+        y = ~ district,
+        type = 'bar',
+        name = district(),
+        marker = list(color = '#DB9743'),
+        hovertemplate = paste0(district()  , ': %{y:,.0f}<extra></extra>'),
+        texttemplate = '%{y:,.0f}',
+        textposition = 'auto'
+      ) %>%
+        plotly::add_trace(y = ~ Others,
+                  name = 'Other',
+                   hovertemplate = 'Other: %{y:,.1f}<extra></extra>',
+                   texttemplate = '%{y:,.0f}',
+                  marker = list(color = '#2a3a6e')) %>%
+        plotly:: config(displayModeBar = FALSE) %>%
+        plotly::layout(
+          xaxis = list(title = "", fixedrange = T, categoryorder = "array", categoryarray = c('PK', 'K', purrr::map_chr(seq(12), function(x){paste('Grade', x)}))),
+          yaxis = list(title = "", fixedrange = T,automargin = T),
+          barmode = 'group',
+          showlegend =F,
+          font = list(size = 18)
+        )
+    )
+    
+sat_results_data <- reactive({
+        plot_comp_df() %>%
+        dplyr::filter(category %in% c('sat_reading_writing', 'sat_math')) %>%
+        dplyr::mutate(dplyr::across(.fns = as.numeric))
+    })
+
+    output$sat_results <-  plotly::renderPlotly(
+        plotly::plot_ly(
+        sat_results_data(),
+        x = ~ c('SAT Reading/Writing','SAT Math'),
+        y = ~ district,
+        type = 'bar',
+        name = district(),
+        marker = list(color = '#DB9743'),
+        hovertemplate = paste0(district()  , ': %{y:,.0f}<extra></extra>'),
+        texttemplate = '%{y:,.0f}',
+        textposition = 'auto'
+      ) %>%
+        plotly::add_trace(y = ~ Others,
+                  name = 'Other',
+                   hovertemplate = 'Other: %{y:,.2f}<extra></extra>',
+                   texttemplate = '%{y:,.1f}',
+                  marker = list(color = '#2a3a6e')) %>%
+        plotly:: config(displayModeBar = FALSE) %>%
+        plotly::layout(
+          xaxis = list(title = "", fixedrange = T, categoryorder = "array", categoryarray = c('PK', 'K', purrr::map_chr(seq(12), function(x){paste('Grade', x)}))),
+          yaxis = list(title = "", fixedrange = T,automargin = T),
+          barmode = 'group',
+          showlegend =F,
+          font = list(size = 18)
+        )
+    )
+    
+sat_taken_data <- reactive({
+        plot_comp_df() %>%
+        dplyr::filter(category %in% c('sat_tests_taken')) %>%
+        dplyr::mutate(dplyr::across(.fns = as.numeric))
+    })
+
+
+    output$sat_taken <-  plotly::renderPlotly(
+        plotly::plot_ly(
+        sat_taken_data(),
+        x = ~ c('SAT Tests Taken'),
+        y = ~ district,
+        type = 'bar',
+        name = district(),
+        marker = list(color = '#DB9743'),
+        hovertemplate = paste0(district()  , ': %{y:,.0f}<extra></extra>'),
+        texttemplate = '%{y:,.0f}',
+        textposition = 'auto'
+      ) %>%
+        plotly::add_trace(y = ~ Others,
+                  name = 'Other',
+                   hovertemplate = 'Other: %{y:,.1f}<extra></extra>',
+                   texttemplate = '%{y:,.0f}',
+                  marker = list(color = '#2a3a6e')) %>%
+        plotly:: config(displayModeBar = FALSE) %>%
+        plotly::layout(
+          xaxis = list(title = "", fixedrange = T, categoryorder = "array", categoryarray = c('PK', 'K', purrr::map_chr(seq(12), function(x){paste('Grade', x)}))),
+          yaxis = list(title = "", fixedrange = T,automargin = T),
+          barmode = 'group',
+          showlegend =F,
+          font = list(size = 18)
+        )
+    )
+    
+mcas_ap_data <- reactive({
+        plot_comp_df() %>%
+        dplyr::filter(category %in% c('sci_advanced_proficient_pct', 'ela_advanced_proficient_pct', 'mth_advanced_proficient_pct')) %>%
+        dplyr::mutate(dplyr::across(.fns = as.numeric))
+    })
+
+
+    output$mcas_ap <-  plotly::renderPlotly(
+        plotly::plot_ly(
+        mcas_ap_data(),
+        x = ~ c('Science', 'ELA', 'Math'),
+        y = ~ district,
+        type = 'bar',
+        name = district(),
+        marker = list(color = '#DB9743'),
+        hovertemplate = paste0(district()  , ': %{y:,.0f}%<extra></extra>'),
+        texttemplate = '%{y:,.0f}%',
+        textposition = 'auto'
+      ) %>%
+        plotly::add_trace(y = ~ Others,
+                  name = 'Other',
+                   hovertemplate = 'Other: %{y:,.2f}%<extra></extra>',
+                   texttemplate = '%{y:,.1f}%',
+                  marker = list(color = '#2a3a6e')) %>%
+        plotly:: config(displayModeBar = FALSE) %>%
+        plotly::layout(
+          xaxis = list(title = "", fixedrange = T, categoryorder = "array", categoryarray = c('PK', 'K', purrr::map_chr(seq(12), function(x){paste('Grade', x)}))),
+          yaxis = list(title = "% Advanced/Proficient", fixedrange = T,automargin = T),
+          barmode = 'group',
+          showlegend =F,
+          font = list(size = 18)
+        )
+    )
+    
+mcas_wf_data <- reactive({
+        plot_comp_df() %>%
+        dplyr::filter(category %in% c('sci_warning_failing_pct', 'ela_warning_failing_pct', 'mth_warning_failing_pct')) %>%
+        dplyr::mutate(dplyr::across(.fns = as.numeric))
+    })
+
+
+
+    output$mcas_wf <-  plotly::renderPlotly(
+        plotly::plot_ly(
+        mcas_wf_data(),
+        x = ~ c('Science', 'ELA', 'Math'),
+        y = ~ district,
+        type = 'bar',
+        name = district(),
+        marker = list(color = '#DB9743'),
+        hovertemplate = paste0(district()  , ': %{y:,.0f}%<extra></extra>'),
+        texttemplate = '%{y:,.0f}%',
+        textposition = 'auto'
+      ) %>%
+        plotly::add_trace(y = ~ Others,
+                  name = 'Other',
+                   hovertemplate = 'Other: %{y:,.2f}%<extra></extra>',
+                   texttemplate = '%{y:,.1f}%',
+                  marker = list(color = '#2a3a6e')) %>%
+        plotly:: config(displayModeBar = FALSE) %>%
+        plotly::layout(
+          xaxis = list(title = "", fixedrange = T, categoryorder = "array", categoryarray = c('PK', 'K', purrr::map_chr(seq(12), function(x){paste('Grade', x)}))),
+          yaxis = list(title = "% Warning/Failing", fixedrange = T,automargin = T),
+          barmode = 'group',
+          showlegend =F,
+          font = list(size = 18)
+        )
+    )
     
 
 # Work Cond.  -------------------------------------------------------------
