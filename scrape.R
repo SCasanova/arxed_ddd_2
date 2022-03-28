@@ -374,6 +374,11 @@ new_school_info <- read_csv('school_info_base.csv') %>%
 
 write_csv(new_school_info, 'school_info.csv')  
 
+day_length <- read_csv('raw_data/day_length.csv') %>% 
+  janitor::clean_names() %>% 
+  select(district_code, elem_length_decimal, hs_length_decimal) %>% 
+  mutate(district_code = formatC(district_code, width = 8, format = "d", flag = "0"))
+
 new_school_info <- read_csv('school_info.csv') %>%
   mutate(district_code = formatC(district_code, width = 8, format = "d", flag = "0")) %>%
   left_join(student_mobility %>% select(-district_name), by = c('district_code', 'year')) %>%
@@ -400,9 +405,36 @@ new_school_info <- read_csv('school_info.csv') %>%
             district_name == "Tri County Regional Vocational Technical" ~ "Tri-County Regional Vocational Technical",
             district_name == "Greater Commonwealth Virtual District" ~ "Greenfield Commonwealth Virtual District",
             district_name == "Southern Worcester County Regional Vocational School District" ~ "Southern Worcester County Regional Vocational Technical",
-            TRUE ~ district_name))
+            TRUE ~ district_name)) %>% 
+  left_join(day_length, by = 'district_code') %>% 
+  mutate(length_of_workday_elementary = coalesce(elem_length_decimal, length_of_workday_elementary),
+         length_of_workday_hs=  coalesce(hs_length_decimal,length_of_workday_hs )) %>% 
+  select(-c(elem_length_decimal,hs_length_decimal))
+
+
 write_csv(new_school_info, 'school_info.csv')
 # 
 
 
+#For collaborative tool
+sending_district <- read_csv('school_info.csv') %>% 
+  filter(year %in% c('2020-21', '2021-22', '2022-23')) %>% 
+  select(district_name, district_code, year, cola_2020_21:cola_2023_24,salary_avg_2020_21:salary_avg_2022_23, total_enrollment,  total_exp) %>% 
+  pivot_wider(values_from = c(total_exp, total_enrollment), names_from = year) %>% 
+  rename_with(.fn = function(x){stringr::str_replace(x,'-', '_')})
+
+
+
+write_csv(sending_district, 'sending_districts.csv')
+
+district_names <-( read_csv('school_info.csv') %>%  filter(year == '2020-21') )$district_name
+
+sending_overview <- read_csv('school_info.csv') %>% 
+  filter(year == '2020-21') %>% 
+  select(district_name, total_enrollment:total_exp_per_pupil)
+  
+
+
+saveRDS(sending_overview, 'sending_overview.rds')
+saveRDS(district_names, 'district_names.rds')
 

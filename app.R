@@ -63,7 +63,7 @@ overview_statistics <- c( #Full name for overview table stats
     "% Teachers Teaching in Field",
     "Total Core Academic Classes",
     "% of Classes Taught by Highly Qualified Teachers",
-    "Total Salary",
+    "Total Teacher Salaries",
     "Average Salary",
     "In-District Expenditure",
     "In-District Pupil FTE",
@@ -116,7 +116,7 @@ statistic_names_full <- c( #Vector for sub-level stats
     "% Teachers w/o Waiver",
     "% Teachers Teaching in Field",
     "Total Core Academic Classes",
-    "% Core Classes Taught by Exp Teachers",
+    "% of Classes Taught by Highly Qualified Teachers",
     "Total Teacher Salaries", # 30
     "Average Salary",
     "In-District Expenditure",
@@ -1366,7 +1366,7 @@ comp_districts <- reactive({
      })
   
 #reset button will clear the selected options (along with js defined in the UI)
-  observeEvent(list(input$reset, input$collaborative), {
+  observeEvent(list(input$reset, input$district), {
       updateSelectizeInput(
         inputId = "district_comps",
         selected = ""
@@ -2057,6 +2057,7 @@ summary_gt <- reactive({
     # NOTE: User can choose to see individual comp districts or aggregated
     # comp districts using the input$individuals parameter (used in if statements below)
     comp_df <- reactive({
+      req(district())
         
         # If comp districts are grouped...
         if (input$individuals == "No"){
@@ -2222,7 +2223,7 @@ summary_gt <- reactive({
                                 "In-District Expenditure per Pupil",
                                 
                                 "Total Teacher FTE",
-                                "Total Salary",
+                                "Total Teacher Salaries",
                                 "Average Salary",
                                 
                                 "Total Enrollment",
@@ -2358,7 +2359,7 @@ summary_gt <- reactive({
                                 "In-District Expenditure per Pupil",
                                 
                                 "Total Teacher FTE",
-                                "Total Salary",
+                                "Total Teacher Salaries",
                                 "Average Salary",
                                 
                                 "Total Enrollment",
@@ -2470,6 +2471,8 @@ summary_gt <- reactive({
     
     # Actually render the {gt} table (need {gt} object to save in next function)
     output$comparisons_table <- gt::render_gt({comp_table()})
+    
+    observe(print(comp_df()))
   
 
 # Plots -------------------------------------------------------------------
@@ -3188,7 +3191,6 @@ output$userplot <- plotly::renderPlotly({
         dplyr::select(district)
     })
     
-    observe(print(finance_data()))
 
 
     output$finances_plot <- plotly::renderPlotly(
