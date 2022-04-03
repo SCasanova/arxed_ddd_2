@@ -3,7 +3,8 @@
 
 library(magrittr)
 library(shiny)
-options(encoding = "UTF-8")
+options(encoding = "UTF-8",
+        warn = -1)
 
 
 # Connect to database -----------------------------------------------
@@ -2472,7 +2473,6 @@ summary_gt <- reactive({
     # Actually render the {gt} table (need {gt} object to save in next function)
     output$comparisons_table <- gt::render_gt({comp_table()})
     
-    observe(print(comp_df()))
   
 
 # Plots -------------------------------------------------------------------
@@ -2599,44 +2599,55 @@ plotdata <- reactive({
       short_district = stringr::str_trunc(district_name, 20, "right")
     )
 })
+
+y_col <-reactive({
+   plotdata() %>%
+    dplyr::filter(!is.na(y())) %>%
+    dplyr::pull(y())
+})
+
+
+
 output$userplot <- plotly::renderPlotly({
-        
-        
         if (input$plot_type == "Scatter"){
           req(x())
           req(y())
-            
-            x <- plotdata() %>% dplyr::pull(x())
-            y <- plotdata() %>% dplyr::pull(y())
-
             plotly::plot_ly(
-                x = x,
-                y = y,
+              data =plotdata(),
+                x = ~get(x()),
+                y = ~get(y()),
                 type = "scatter",
                 mode = "markers",
                 marker = list(
                     size = 30,
                     opacity = .5
                 ),
-                color = plotdata()$short_district,
+                color = ~short_district,
                 colors = ggsci::pal_jco()(10),
                 hovertemplate = paste((plotdata() %>% dplyr::pull(district_name)),
                                       "<br>",
                                       names(axis_options)[axis_options == x()], ":",
-                                      (plotdata() %>% dplyr::pull(x())),
+                                      '%{x:.4s}',
                                       "<br>",
                                       names(axis_options)[axis_options == y()], ":",
-                                      (plotdata() %>% dplyr::pull(y())),
+                                      '%{y:.4s}',
                                       "<extra></extra>"),
                 height = 630) %>%
-                plotly::layout(yaxis = list(title = names(axis_options)[axis_options == y()], fixedrange = T),
-                       xaxis = list(title = names(axis_options)[axis_options == x()], fixedrange = T),
-                       title = paste0(district(), " vs. Comparison Districts",
-                                     "<br><sup>", names(axis_options)[axis_options == y()],
-                                     "vs.", names(axis_options)[axis_options == x()], input$comp_year, "</sup>"),
+              plotly::layout(
+                yaxis = list(title = names(axis_options)[axis_options == y()], fixedrange = T),
+                xaxis = list(title = names(axis_options)[axis_options == x()], fixedrange = T),
+                title = paste0(
+                  district(),
+                  " vs. Comparison Districts",
+                  "<br><sup>",
+                  names(axis_options)[axis_options == y()],
+                  "vs.",
+                  names(axis_options)[axis_options == x()],
+                  "</sup>"
+                ),
                        images = list(
                            source = base64enc::dataURI(file = "https://raw.githubusercontent.com/SCasanova/arxed_ddd/main/www/D3%20Logo.png"),
-                           x = 0, y = 1,
+                           x = 1, y = 0.1,
                            sizex = 0.2, sizey = 0.2
                        ))
             
@@ -2644,61 +2655,52 @@ output$userplot <- plotly::renderPlotly({
         
         else if (input$plot_type == "Pie"){
           req(y())
-            
-            y <- plotdata() %>% dplyr::pull(y())
-            x <- factor(plotdata() %>% dplyr::pull(district_name), levels = unique(plotdata() %>% dplyr::pull(district_name))[order(plotdata() %>% dplyr::pull(y()))])
-            y_mean <- mean(y, na.rm = T)
-            
+            y_mean <- mean(y_col(), na.rm = T)
             plotly::plot_ly(
-                labels = x,
-                values = y,
-                marker = list(colors = ggsci::pal_jco()(10)),
-                textinfo='label+percent',
-                hovertemplate = paste((plotdata() %>% dplyr::pull(district_name)),
-                                      "<br>",
-                                      names(axis_options)[axis_options == y()], ":",
-                                      y, "<extra></extra>"),
-                height = 630) %>%
-              plotly::add_pie(hole = 0.4) %>% 
-                plotly::layout(title = paste0(district(), " vs. Comparison Districts",
-                                     "<br><sup>", names(axis_options)[axis_options == y()], input$comp_year, "</sup>"),
+              data = plotdata(),
+              labels = ~ district_name,
+              values = ~ get(y()),
+              marker = list(colors = ggsci::pal_jco()(10)),
+              textinfo = 'label+percent',
+              hoverinfo = 'text',
+              text = ~ paste(district_name, '<br>',names(axis_options)[axis_options == y()], ':', get(y())),
+              height = 630
+            ) %>%
+              plotly::add_pie(hole = 0.4) %>%
+              plotly::layout(
+                title = paste0(district(), " vs. Comparison District",
+                               "<br><sup>", names(axis_options)[axis_options == y()], "</sup>"),
                                margin = list(l = 50,r = 50,b = 50,t = 50,pad = 4), 
-                       legend = list(font = list(size = 11)),
-                       images = list(
-                           source = base64enc::dataURI(file = "https://raw.githubusercontent.com/SCasanova/arxed_ddd/main/www/D3%20Logo.png"),
-                           x = 0, y = 1,
-                           sizex = 0.2, sizey = 0.2
-                       ))
+                       legend = list(font = list(size = 11))
+                )
             
         }
         
         else{
           req(y())
-            
-            y <- plotdata() %>% dplyr::pull(y())
-            x <- factor(plotdata() %>% dplyr::pull(district_name), levels = unique(plotdata() %>% dplyr::pull(district_name))[order(plotdata() %>% dplyr::pull(y()))])
-            district_short <- factor(plotdata() %>% dplyr::pull(short_district), levels = unique(plotdata() %>% dplyr::pull(short_district))[order(plotdata() %>% dplyr::pull(y()))])
-            y_mean <- mean(y, na.rm = T)
+            y_mean <- mean(y_col(), na.rm = T)
             
             plotly::plot_ly(
-                x = x,
-                y = y,
+              data =plotdata(),
+                x = ~district_name,
+                y = ~get(y()),
                 type = "bar",
-                color = district_short,
+                color = ~short_district,
                 colors = ggsci::pal_jco()(10),
-                hovertemplate = paste((plotdata() %>% dplyr::pull(district_name)),
+                hovertemplate = paste('%{x}',
                                       "<br>",
                                       names(axis_options)[axis_options == y()], ":",
-                                      y, "<extra></extra>"),
-                texttemplate = '%{y:.2f}', textposition = 'outside',
+                                      '%{y:.4s}', "<extra></extra>"),
+                texttemplate = '%{y:.3s}', 
+                textposition = 'outside',
                 height = 630) %>%
                 plotly::layout(xaxis = list(title = "District", showticklabels = F, fixedrange = T),
                        yaxis = list(title = names(axis_options)[axis_options == y()] , fixedrange = T),
                        title = paste0(district(), " vs. Comparison Districts",
-                                     "<br><sup>", names(axis_options)[axis_options == y()], input$comp_year, "</sup>"),
+                                     "<br><sup>", names(axis_options)[axis_options == y()], "</sup>"),
                        legend = list(font = list(size = 11)),
                        annotations = list(
-                           x = sort(x)[1],
+                           x = 0,
                            y = y_mean,
                            text = paste("Avg:", round(y_mean,1)),
                            xref = "x",
@@ -2708,10 +2710,10 @@ output$userplot <- plotly::renderPlotly({
                            ax = 20,
                            ay = -40
                        ),
-                       shapes = list(type='line', x0 = sort(x)[1], x1 = sort(x)[nrow(plotdata())], y0=y_mean, y1=y_mean, line=list(dash='dot', width=1)),
+                       shapes = list(type='line', x0 = 0, x1 = (length(y_col()) - sum(is.na(y_col()))), y0=y_mean, y1=y_mean, line=list(dash='dot', width=1)),
                        images = list(
                            source = base64enc::dataURI(file = "https://raw.githubusercontent.com/SCasanova/arxed_ddd/main/www/D3%20Logo.png"),
-                           x = 0, y = 1,
+                           x = 1, y = 0.1,
                            sizex = 0.2, sizey = 0.2
                        ))
             
