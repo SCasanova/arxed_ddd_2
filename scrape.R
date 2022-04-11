@@ -419,9 +419,15 @@ write_csv(new_school_info, 'school_info.csv')
 #For collaborative tool
 sending_district <- read_csv('school_info.csv') %>% 
   filter(year %in% c('2020-21', '2021-22', '2022-23')) %>% 
-  select(district_name, district_code, year, cola_2020_21:cola_2023_24,salary_avg_2020_21:salary_avg_2022_23, total_enrollment,  total_exp) %>% 
+  select(district_name, district_code, year, cola_2020_21:cola_2023_24,salary_avg_2020_21:salary_avg_2022_23, upper_left_2020_21:upper_left_2022_23, lower_right_2020_21:lower_right_2022_23, total_enrollment,  total_exp) %>% 
   pivot_wider(values_from = c(total_exp, total_enrollment), names_from = year) %>% 
-  rename_with(.fn = function(x){stringr::str_replace(x,'-', '_')})
+  rename_with(.fn = function(x){stringr::str_replace(x,'-', '_')}) %>% 
+  left_join(
+    read_csv('school_info.csv') %>% 
+      filter(year == '2020-21') %>% 
+      select(district_name, instructional_services,administration,pupil_services,operations_and_maintenance,insurance_retirement_programs_and_other, disabled_pct ,pct_health_insurance_paid, grade_pk:grade_sp ),
+    by = 'district_name'
+  )
 
 
 

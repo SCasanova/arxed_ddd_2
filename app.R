@@ -1558,7 +1558,7 @@ summary_gt <- reactive({
           barmode = 'group',
           title = 'COLA %',
           autosize = T,
-          showlegend =F,
+          showlegend =F, margin = list(l = 0,r = 0,b = 0,t = 50,pad = 4),
           font = list(size = 12)
         )
   })
@@ -1595,7 +1595,7 @@ summary_gt <- reactive({
           barmode = 'group',
           title = 'Upper-Left Salary',
           autosize = T,
-          showlegend =F,
+          showlegend =F, margin = list(l = 0,r = 0,b = 0,t = 50,pad = 4),
           font = list(size = 12)
         )
   })
@@ -1632,7 +1632,7 @@ summary_gt <- reactive({
           barmode = 'group',
           title = 'Lower-Right Salary',
           autosize = T,
-          showlegend =F,
+          showlegend =F, margin = list(l = 0,r = 0,b = 0,t = 50,pad = 4),
           font = list(size = 12)
         )
   })
@@ -1669,7 +1669,7 @@ summary_gt <- reactive({
           yaxis = list(title = "", fixedrange = T, range  = c(min(average_salary_data())*0.85, max(average_salary_data())*1.15)),
           title = 'Average Salary',
           autosize = T,
-          showlegend =F,
+          showlegend =F, margin = list(l = 0,r = 0,b = 0,t = 50,pad = 4),
           font = list(size = 12)
         )
   })
@@ -1713,7 +1713,7 @@ summary_gt <- reactive({
           barmode = 'group',
           title = 'Total Budget',
           autosize = T,
-          showlegend =F,
+          showlegend =F, margin = list(l = 0,r = 0,b = 0,t = 50,pad = 4),
           font = list(size = 12)
          )
   })
@@ -1749,7 +1749,7 @@ summary_gt <- reactive({
           yaxis = list(title = "", fixedrange = T,automargin = T, range = c(0, max(per_pupil(), na.rm = T)*1.15)),
           barmode = 'group',
           title = 'Per-Pupil Expenditure',
-          showlegend =F,
+          showlegend =F, margin = list(l = 0,r = 0,b = 0,t = 50,pad = 4),
           font = list(size = 13)
         )
     )
@@ -1785,7 +1785,7 @@ summary_gt <- reactive({
           yaxis = list(title = "", fixedrange = T,automargin = T, range = c(0, max(avg_salary(), na.rm = T)*1.15)),
           barmode = 'group',
           title = 'Average Teacher Salary',
-          showlegend =F,
+          showlegend =F, margin = list(l = 0,r = 0,b = 0,t = 50,pad = 4),
           font = list(size = 13)
         )
     )
@@ -1821,7 +1821,7 @@ summary_gt <- reactive({
           yaxis = list(title = "", fixedrange = T,automargin = T, range = max(enrollment(), na.rm = T)*1.15),
           barmode = 'group',
           title = 'Total Enrollment',
-          showlegend =F,
+          showlegend =F, margin = list(l = 0,r = 0,b = 0,t = 50,pad = 4),
           font = list(size = 13)
         )
     )
@@ -1858,7 +1858,7 @@ summary_gt <- reactive({
           yaxis = list(title = "% of scores 3-5", fixedrange = T,automargin = T, range = c(0, max(placement(), na.rm = T)*1.15)),
           barmode = 'group',
           title = 'Advanced Placement',
-          showlegend =F,
+          showlegend =F, margin = list(l = 0,r = 0,b = 0,t = 50,pad = 4),
           font = list(size = 13)
         )
     )
@@ -1894,7 +1894,7 @@ summary_gt <- reactive({
           yaxis = list(title = "", fixedrange = T,automargin = T, range = c(0, max(total_teachers_data(), na.rm = T)*1.15)),
           barmode = 'group',
           title = 'Total Teachers',
-          showlegend =F,
+          showlegend =F, margin = list(l = 0,r = 0,b = 0,t = 50,pad = 4),
           font = list(size = 13)
         )
     )
@@ -1971,7 +1971,7 @@ summary_gt <- reactive({
           yaxis = list(title = "% Advanced/Proficient", fixedrange = T,automargin = T, range = c(0, max(mcas_data(), na.rm = T)*1.15)),
           barmode = 'group',
           title = '10th Grade MCAS',
-          showlegend =F,
+          showlegend =F, margin = list(l = 0,r = 0,b = 0,t = 50,pad = 4),
           font = list(size = 13)
         )
     )
@@ -2606,6 +2606,40 @@ y_col <-reactive({
     dplyr::pull(y())
 })
 
+text_format <- reactive({
+  top <- max(y_col(), na.rm = T)
+  if(top<=1){
+    '%{y:.0%}'
+  } else if(top <= 100){
+    '%{y:.2s}'
+  } else{
+    '%{y:.3s}'
+  }
+})
+
+hover_format <- reactive({
+  top <- max(y_col(), na.rm = T)
+  if(top<=1){
+    '%{y:.1%}'
+  } else if(top <= 100){
+    '%{y:.3s}'
+  } else{
+    '%{y:.4s}'
+  }
+})
+
+hover_format_x <- reactive({
+  top <- max(y_col(), na.rm = T)
+  if(top<=1){
+    '%{x:.2%}'
+  } else if(top <= 100){
+    '%{x:.3s}'
+  } else{
+    '%{x:.4s}'
+  }
+})
+
+
 
 
 output$userplot <- plotly::renderPlotly({
@@ -2627,10 +2661,10 @@ output$userplot <- plotly::renderPlotly({
                 hovertemplate = paste((plotdata() %>% dplyr::pull(district_name)),
                                       "<br>",
                                       names(axis_options)[axis_options == x()], ":",
-                                      '%{x:.4s}',
+                                      hover_format_x(),
                                       "<br>",
                                       names(axis_options)[axis_options == y()], ":",
-                                      '%{y:.4s}',
+                                      hover_format(),
                                       "<extra></extra>"),
                 height = 630) %>%
               plotly::layout(
@@ -2690,8 +2724,8 @@ output$userplot <- plotly::renderPlotly({
                 hovertemplate = paste('%{x}',
                                       "<br>",
                                       names(axis_options)[axis_options == y()], ":",
-                                      '%{y:.4s}', "<extra></extra>"),
-                texttemplate = '%{y:.3s}', 
+                                      hover_format(), "<extra></extra>"),
+                texttemplate = text_format(), 
                 textposition = 'outside',
                 height = 630) %>%
                 plotly::layout(xaxis = list(title = "District", showticklabels = F, fixedrange = T),
@@ -2725,14 +2759,14 @@ output$userplot <- plotly::renderPlotly({
 
     general_data <- reactive({
         plot_comp_df() %>% 
-        dplyr::filter(category %in% c('grade_pk', 'grade_k', paste0('grade_', seq(12)))) %>% 
+        dplyr::filter(category %in% c('grade_pk', 'grade_k', paste0('grade_', seq(12)), 'grade_sp')) %>% 
         dplyr::mutate(dplyr::across(.fns = as.numeric))
     })
     
     output$student_general <-  plotly::renderPlotly(
         plotly::plot_ly(
         general_data(),
-        x = ~ c('PK', 'K', purrr::map_chr(seq(12), function(x){paste('Grade', x)})), #cleaner name),
+        x = ~ c('PK', 'K', purrr::map_chr(seq(12), function(x){paste('Grade', x)}), 'Grade SP'), #cleaner name),
         y = ~ district,
         type = 'bar',
         name = district(),
@@ -2746,7 +2780,7 @@ output$userplot <- plotly::renderPlotly({
           xaxis = list(title = "", tickangle = -45, fixedrange = T, categoryorder = "array", categoryarray = c('PK', 'K', purrr::map_chr(seq(12), function(x){paste('Grade', x)}))),
           yaxis = list(title = "", fixedrange = T,automargin = T, range = c(0, max(general_data(), na.rm = T)*1.15)),
           barmode = 'group',
-          showlegend =F,
+          showlegend =F, margin = list(l = 0,r = 0,b = 0,t = 50,pad = 4),
           font = list(size = 18),
           images = list(
             source = "https://raw.githubusercontent.com/SCasanova/arxed_ddd/main/www/D3%20Logo.png",
@@ -2791,7 +2825,7 @@ output$userplot <- plotly::renderPlotly({
           xaxis = list(title = "", fixedrange = T, categoryorder = "array", categoryarray = c('PK', 'K', purrr::map_chr(seq(12), function(x){paste('Grade', x)}))),
           yaxis = list(title = "", fixedrange = T,automargin = T),
           barmode = 'group',
-          showlegend =F,
+          showlegend =F, margin = list(l = 0,r = 0,b = 0,t = 50,pad = 4),
           font = list(size = 18)
         )
     )
@@ -2823,7 +2857,7 @@ output$userplot <- plotly::renderPlotly({
           xaxis = list(title = "", tickangle = -25, fixedrange = T, categoryorder = "array", categoryarray = c('PK', 'K', purrr::map_chr(seq(12), function(x){paste('Grade', x)}))),
           yaxis = list(title = "", fixedrange = T,automargin = T,range = c(0, max(diversity_data(), na.rm = T)*1.15)),
           barmode = 'group',
-          showlegend =F,
+          showlegend =F, margin = list(l = 0,r = 0,b = 0,t = 50,pad = 4),
           font = list(size = 18),
           images = list(
             source = "https://raw.githubusercontent.com/SCasanova/arxed_ddd/main/www/D3%20Logo.png",
@@ -2901,7 +2935,7 @@ output$userplot <- plotly::renderPlotly({
           xaxis = list(title = "", fixedrange = T, categoryorder = "array", categoryarray = c('PK', 'K', purrr::map_chr(seq(12), function(x){paste('Grade', x)}))),
           yaxis = list(title = "", fixedrange = T,automargin = T, range = c(0,max( mobility_data(), na.rm = T)*1.15)),
           barmode = 'group',
-          showlegend =F,
+          showlegend =F, margin = list(l = 0,r = 0,b = 0,t = 50,pad = 4),
           font = list(size = 18),
           images = list(
             source = "https://raw.githubusercontent.com/SCasanova/arxed_ddd/main/www/D3%20Logo.png",
@@ -2955,7 +2989,7 @@ output$userplot <- plotly::renderPlotly({
           xaxis = list(title = "", fixedrange = T, categoryorder = "array", categoryarray = c('PK', 'K', purrr::map_chr(seq(12), function(x){paste('Grade', x)}))),
           yaxis = list(title = "", fixedrange = T,automargin = T),
           barmode = 'group',
-          showlegend =F,
+          showlegend =F, margin = list(l = 0,r = 0,b = 0,t = 50,pad = 4),
           font = list(size = 18)
         )
     )
@@ -2989,7 +3023,7 @@ output$userplot <- plotly::renderPlotly({
           xaxis = list(title = "", fixedrange = T),
           yaxis = list(title = "", fixedrange = T,automargin = T),
           barmode = 'group',
-          showlegend =F,
+          showlegend =F, margin = list(l = 0,r = 0,b = 0,t = 50,pad = 4),
           font = list(size = 18)
         )
     )
@@ -3090,7 +3124,7 @@ output$userplot <- plotly::renderPlotly({
           xaxis = list(title = "", tickangle = -25, fixedrange = T, categoryorder = "array", categoryarray = c('African American', 'Asian', 'Hispanic', 'White', 'Native American', 'Hawaiian/Pacific Islander', 'Multi-Race')),
           yaxis = list(title = "", fixedrange = T,automargin = T,range = c(0, max(staff_diversity_data(), na.rm = T)*1.15)),
           barmode = 'group',
-          showlegend =F,
+          showlegend =F, margin = list(l = 0,r = 0,b = 0,t = 50,pad = 4),
           font = list(size = 18),
           images = list(
             source = "https://raw.githubusercontent.com/SCasanova/arxed_ddd/main/www/D3%20Logo.png",
@@ -3165,7 +3199,7 @@ output$userplot <- plotly::renderPlotly({
           xaxis = list(title = "", fixedrange = T, categoryorder = "array", categoryarray = c('African American', 'Asian', 'Hispanic', 'White', 'Native American', 'Hawaiian/Pacific Islander', 'Multi-Race')),
           yaxis = list(title = "", fixedrange = T,automargin = T,range = c(0, max(teacher_pct_df(), na.rm = T)*1.15)),
           barmode = 'group',
-          showlegend =F,
+          showlegend =F, margin = list(l = 0,r = 0,b = 0,t = 50,pad = 4),
           font = list(size = 18),
           images = list(
             source = "https://raw.githubusercontent.com/SCasanova/arxed_ddd/main/www/D3%20Logo.png",
@@ -3254,7 +3288,7 @@ output$userplot <- plotly::renderPlotly({
           yaxis = list(title = "", fixedrange = T),
           margin = list(b = 100),
           barmode = 'group',
-          showlegend =F,
+          showlegend =F, margin = list(l = 0,r = 0,b = 0,t = 50,pad = 4),
           font = list(size = 18)
         )
   })
@@ -3291,7 +3325,7 @@ ap_3_5_data <- reactive({
           xaxis = list(title = "", fixedrange = T, categoryorder = "array", categoryarray = c('PK', 'K', purrr::map_chr(seq(12), function(x){paste('Grade', x)}))),
           yaxis = list(title = "", fixedrange = T,automargin = T),
           barmode = 'group',
-          showlegend =F,
+          showlegend =F, margin = list(l = 0,r = 0,b = 0,t = 50,pad = 4),
           font = list(size = 18)
         )
     )
@@ -3325,7 +3359,7 @@ ap_taken_data <- reactive({
           xaxis = list(title = "", fixedrange = T, categoryorder = "array", categoryarray = c('PK', 'K', purrr::map_chr(seq(12), function(x){paste('Grade', x)}))),
           yaxis = list(title = "", fixedrange = T,automargin = T),
           barmode = 'group',
-          showlegend =F,
+          showlegend =F, margin = list(l = 0,r = 0,b = 0,t = 50,pad = 4),
           font = list(size = 18)
         )
     )
@@ -3358,7 +3392,7 @@ sat_results_data <- reactive({
           xaxis = list(title = "", fixedrange = T, categoryorder = "array", categoryarray = c('PK', 'K', purrr::map_chr(seq(12), function(x){paste('Grade', x)}))),
           yaxis = list(title = "", fixedrange = T,automargin = T),
           barmode = 'group',
-          showlegend =F,
+          showlegend =F, margin = list(l = 0,r = 0,b = 0,t = 50,pad = 4),
           font = list(size = 18)
         )
     )
@@ -3392,7 +3426,7 @@ sat_taken_data <- reactive({
           xaxis = list(title = "", fixedrange = T, categoryorder = "array", categoryarray = c('PK', 'K', purrr::map_chr(seq(12), function(x){paste('Grade', x)}))),
           yaxis = list(title = "", fixedrange = T,automargin = T),
           barmode = 'group',
-          showlegend =F,
+          showlegend =F, margin = list(l = 0,r = 0,b = 0,t = 50,pad = 4),
           font = list(size = 18)
         )
     )
@@ -3426,7 +3460,7 @@ mcas_ap_data <- reactive({
           xaxis = list(title = "", fixedrange = T, categoryorder = "array", categoryarray = c('PK', 'K', purrr::map_chr(seq(12), function(x){paste('Grade', x)}))),
           yaxis = list(title = "% Advanced/Proficient", fixedrange = T,automargin = T),
           barmode = 'group',
-          showlegend =F,
+          showlegend =F, margin = list(l = 0,r = 0,b = 0,t = 50,pad = 4),
           font = list(size = 18)
         )
     )
@@ -3461,7 +3495,7 @@ mcas_wf_data <- reactive({
           xaxis = list(title = "", fixedrange = T, categoryorder = "array", categoryarray = c('PK', 'K', purrr::map_chr(seq(12), function(x){paste('Grade', x)}))),
           yaxis = list(title = "% Warning/Failing", fixedrange = T,automargin = T),
           barmode = 'group',
-          showlegend =F,
+          showlegend =F, margin = list(l = 0,r = 0,b = 0,t = 50,pad = 4),
           font = list(size = 18)
         )
     )
@@ -3493,7 +3527,7 @@ days_with_df <- reactive({
           xaxis = list(title = "", fixedrange = T, categoryorder = "array", categoryarray = c('African American', 'Asian', 'Hispanic', 'White', 'Native American', 'Hawaiian/Pacific Islander', 'Multi-Race')),
           yaxis = list(title = "", fixedrange = T,automargin = T,range = c(0, max(days_with_df(), na.rm = T)*1.15)),
           barmode = 'group',
-          showlegend =F,
+          showlegend =F, margin = list(l = 0,r = 0,b = 0,t = 50,pad = 4),
           font = list(size = 18)
         ) %>% 
         plotly::add_trace(y = ~ Others,
@@ -3528,7 +3562,7 @@ days_with_df <- reactive({
           xaxis = list(title = "", fixedrange = T, categoryorder = "array", categoryarray = c('African American', 'Asian', 'Hispanic', 'White', 'Native American', 'Hawaiian/Pacific Islander', 'Multi-Race')),
           yaxis = list(title = "", fixedrange = T,automargin = T,range = c(0, max(days_wo_df(), na.rm = T)*1.15)),
           barmode = 'group',
-          showlegend =F,
+          showlegend =F, margin = list(l = 0,r = 0,b = 0,t = 50,pad = 4),
           font = list(size = 18),
           images = list(
             source = "https://raw.githubusercontent.com/SCasanova/arxed_ddd/main/www/D3%20Logo.png",
@@ -3567,7 +3601,7 @@ days_with_df <- reactive({
           xaxis = list(title = "", fixedrange = T, categoryorder = "array", categoryarray = c('African American', 'Asian', 'Hispanic', 'White', 'Native American', 'Hawaiian/Pacific Islander', 'Multi-Race')),
           yaxis = list(title = "", fixedrange = T,automargin = T,range = c(0, max(health_df(), na.rm = T)*1.15)),
           barmode = 'group',
-          showlegend =F,
+          showlegend =F, margin = list(l = 0,r = 0,b = 0,t = 50,pad = 4),
           font = list(size = 18),
           images = list(
             source = "https://raw.githubusercontent.com/SCasanova/arxed_ddd/main/www/D3%20Logo.png",
@@ -3606,7 +3640,7 @@ days_with_df <- reactive({
           xaxis = list(title = "", fixedrange = T, categoryorder = "array", categoryarray = c('African American', 'Asian', 'Hispanic', 'White', 'Native American', 'Hawaiian/Pacific Islander', 'Multi-Race')),
           yaxis = list(title = "", fixedrange = T,automargin = T,range = c(0, max(sick_bank_df(), na.rm = T)*1.15)),
           barmode = 'group',
-          showlegend =F,
+          showlegend =F, margin = list(l = 0,r = 0,b = 0,t = 50,pad = 4),
           font = list(size = 18),
           images = list(
             source = "https://raw.githubusercontent.com/SCasanova/arxed_ddd/main/www/D3%20Logo.png",
